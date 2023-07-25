@@ -3,6 +3,9 @@ import { Component, ReactNode, createRef } from 'react';
 import './Canvas.scss';
 
 import { Point, diffPoints, addPoints, scalePoint, ORIGIN } from './util/point';
+import Line from './shape/line';
+import Rectangle from './shape/rectangle';
+import Text from './shape/text';
 
 const ZOOM_SENSITIVITY = 500;
 
@@ -26,13 +29,13 @@ class Canvas extends Component<any, CanvasState> {
         this._setCanvasSize();
         this._draw();
         const [canvas, _] = this._getCanvas();
-        document.addEventListener('resize', this._onWindowsResize);
+        window.addEventListener('resize', this._onWindowsResize);
         canvas.addEventListener("wheel", this._onZoom);
     }
 
     componentWillUnmount(): void {
         const [canvas, _] = this._getCanvas();
-        document.removeEventListener('resize', this._onWindowsResize);
+        window.removeEventListener('resize', this._onWindowsResize);
         canvas.removeEventListener("wheel", this._onZoom);
     }
 
@@ -54,23 +57,26 @@ class Canvas extends Component<any, CanvasState> {
     }
 
     private _draw = (): void => {
-        const [_, context] = this._getCanvas();
+        const [canvas, context] = this._getCanvas();
         const storedTransform = context.getTransform();
         context.canvas.width = context.canvas.width;
         context.setTransform(storedTransform);
-        context.strokeStyle = "#0d6efd";
-        context?.rect(800, 20, 200, 100);
-        context.stroke();
-        context.font = "100px serif";
-        context?.fillText("text", 100, 200);
-        context.font = "50px serif";
-        context?.fillText("text", 100, 0);
+
+        new Text({ text: "Text", pos: { x: 0, y: -50 } }).draw(canvas, context);
+
+        for (let i = 0; i < 50; i++) {
+            for (let j = 0; j < 60; j++) {
+                new Rectangle({ pos: { x: i * 60 + i * 5, y: j * 30 + j * 5 }, size: { w: 60, h: 30 }, borderColor: "green" }).draw(canvas, context);
+            }
+        }
     }
 
     private _onStartPen = (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>): void => {
-        document.addEventListener("mousemove", this._onMouseMove);
-        document.addEventListener("mouseup", this._onMouseUp);
-        this._lastMousePos = { x: event.pageX, y: event.pageY };
+        if (event.button === 1) {
+            document.addEventListener("mousemove", this._onMouseMove);
+            document.addEventListener("mouseup", this._onMouseUp);
+            this._lastMousePos = { x: event.pageX, y: event.pageY };
+        }
     }
 
     private _onMouseUp = (): void => {
