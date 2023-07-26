@@ -84,25 +84,39 @@ class Canvas extends Component<any, CanvasState> {
     private _onMouseDown = (event: MouseEvent): void => {
         if (event.button === 1) {
             const [canvas, _] = this._getCanvas();
-            canvas.addEventListener('mousemove', this._onMouseMove);
-            canvas.addEventListener('mouseup', this._onMouseUp);
+            canvas.addEventListener('mousemove', this._onMouseWheelMove);
+            canvas.addEventListener('mouseup', this._onMouseWheelUp);
             this._lastMousePos = { x: event.pageX, y: event.pageY };
+        } else if (event.button === 0) {
+
         }
     }
 
-    private _onMouseUp = (event: MouseEvent): void => {
+    private _onMouseWheelUp = (event: MouseEvent): void => {
         const [canvas, _] = this._getCanvas();
-        canvas.removeEventListener('mousemove', this._onMouseMove);
-        canvas.removeEventListener('mouseup', this._onMouseUp);
+        canvas.removeEventListener('mousemove', this._onMouseWheelMove);
+        canvas.removeEventListener('mouseup', this._onMouseWheelUp);
     }
 
-    private _onMouseMove = (event: MouseEvent): void => {
+    private _onMouseWheelMove = (event: MouseEvent): void => {
         const lastMousePos = this._lastMousePos;
         const currentMousePos = { x: event.pageX, y: event.pageY };
         this._lastMousePos = currentMousePos;
 
         const delta = diffPoints(currentMousePos, lastMousePos);
         this._moveCamera(delta);
+        this._draw();
+    }
+
+    private _onMouseLeftUp = (event: MouseEvent): void => {
+        const [canvas, _] = this._getCanvas();
+        canvas.removeEventListener('mousemove', this._onMouseLeftMove);
+        canvas.removeEventListener('mouseup', this._onMouseLeftUp);
+    }
+
+    private _onMouseLeftMove = (event: MouseEvent): void => {
+        this._lastMousePos = { x: event.pageX, y: event.pageY };
+
         this._draw();
     }
 
