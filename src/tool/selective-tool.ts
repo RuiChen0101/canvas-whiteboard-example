@@ -27,7 +27,7 @@ class SelectiveTool implements Tool {
     draw(): Shape[] {
         if (!this._activate) return [];
         return [
-            new Rectangle({ pos: this._startPos, size: { w: this._endPos.x - this._startPos.x, h: this._endPos.y - this._startPos.y } })
+            new Rectangle({ pos: this._startPos, size: { w: this._endPos.x - this._startPos.x, h: this._endPos.y - this._startPos.y }, borderColor: "#0d6efd", color: "#0d6efd1a" })
         ];
     }
 }

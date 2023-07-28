@@ -24,7 +24,7 @@ class Rectangle implements Shape {
         this._size = prop?.size ?? ZERO_SIZE;
         this._color = prop?.color ?? "transparent";
         this._radius = prop?.radius ?? 0;
-        this._borderWidth = prop?.borderWidth ?? 0;
+        this._borderWidth = prop?.borderWidth ?? 1;
         this._borderColor = prop?.borderColor ?? "#000";
     }
 

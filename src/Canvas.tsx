@@ -2,34 +2,47 @@ import { Component, ReactNode, createRef } from 'react';
 
 import './Canvas.scss';
 
-import Text from './shape/text';
-import Circle from './shape/circle';
-import Rectangle from './shape/rectangle';
+import Tool from './tool/tool';
+import Shape from './shape/shape';
+import { Size, ZERO_SIZE } from './util/size';
+import SelectiveTool from './tool/selective-tool';
 import { Point, diffPoints, addPoints, scalePoint, ORIGIN, middlePoint, pointDistance } from './util/point';
+import CameraControl from './util/camera-control';
+import Circle from './shape/circle';
+import Text from './shape/text';
+import Rectangle from './shape/rectangle';
+import Rotate from './shape/rotate';
 
-const ZOOM_SENSITIVITY: number = 200;
+interface CanvasProps {
+    shapes: Shape[];
+    cameraBound: Size;
+}
 
 interface CanvasState {
 }
 
-class Canvas extends Component<any, CanvasState> {
+class Canvas extends Component<CanvasProps, CanvasState> {
     private _canvasRef = createRef<HTMLCanvasElement>();
     private _lastMousePos: Point = ORIGIN; // for touch screen, track pad and mouse
     private _distance: number = 0; // for touch screen
-    private _offset: Point = ORIGIN;
-    private _viewport: Point = ORIGIN;
-    private _scale: number = 1;
+    private _currentTool: Tool = new SelectiveTool();
 
-    constructor(prop: any) {
+    private _cameraControl?: CameraControl;
+
+    private _ticker: any;
+
+    constructor(prop: CanvasProps) {
         super(prop);
         this.state = {
         }
     }
 
     componentDidMount(): void {
+        const [canvas, context] = this._getCanvas();
+        this._cameraControl = new CameraControl({ context: context, canvas: canvas, cameraBound: this.props.cameraBound })
         this._setCanvasSize();
-        this._draw();
-        const [canvas, _] = this._getCanvas();
+        this._cameraControl.zoomTo({ x: 0, y: 0 }, { w: 1280, h: 720 });
+        this._ticker = setInterval(this._draw, 16.667);
         window.addEventListener('resize', this._onWindowsResize);
         canvas.addEventListener('wheel', this._onWheel);
         canvas.addEventListener('mousedown', this._onMouseDown);
@@ -38,6 +51,7 @@ class Canvas extends Component<any, CanvasState> {
 
     componentWillUnmount(): void {
         const [canvas, _] = this._getCanvas();
+        clearInterval(this._ticker);
         window.removeEventListener('resize', this._onWindowsResize);
         canvas.removeEventListener('wheel', this._onWheel);
         canvas.removeEventListener('mousedown', this._onMouseDown);
@@ -46,7 +60,6 @@ class Canvas extends Component<any, CanvasState> {
 
     private _onWindowsResize = (): void => {
         this._setCanvasSize();
-        this._draw();
     }
 
     private _getCanvas = (): [HTMLCanvasElement, CanvasRenderingContext2D] => {
@@ -56,28 +69,24 @@ class Canvas extends Component<any, CanvasState> {
     }
 
     private _setCanvasSize = (): void => {
-        const [canvas, _] = this._getCanvas();
+        const [canvas, context] = this._getCanvas();
+        const storedTransform = context.getTransform();
         canvas.height = window.innerHeight;
         canvas.width = window.innerWidth;
+        context.setTransform(storedTransform);
+        this._cameraControl!.canvasSize = { w: canvas.width, h: canvas.height };
     }
 
     private _draw = (): void => {
         const [canvas, context] = this._getCanvas();
         const storedTransform = context.getTransform();
-        context.canvas.width = context.canvas.width;
+        canvas.width = canvas.width;
         context.setTransform(storedTransform);
 
-        for (let i = 0; i < 50; i++) {
-            for (let j = 0; j < 50; j++) {
-                const pos = { x: i * 60 + i * 5, y: j * 60 + j * 5 };
-                new Text({ pos: { x: pos.x - 9, y: pos.y + 5 }, text: "text" }).draw(canvas, context);
-            }
-        }
-        for (let i = 0; i < 50; i++) {
-            for (let j = 0; j < 50; j++) {
-                const pos = { x: i * 60 + i * 5, y: j * 60 + j * 5 };
-                new Circle({ pos: pos, radius: 30 }).draw(canvas, context);
-            }
+        const shapes: Shape[] = [...this.props.shapes, ...this._currentTool.draw()];
+
+        for (const s of shapes) {
+            s.draw(canvas, context);
         }
     }
 
@@ -88,7 +97,11 @@ class Canvas extends Component<any, CanvasState> {
             canvas.addEventListener('mouseup', this._onMouseWheelUp);
             this._lastMousePos = { x: event.pageX, y: event.pageY };
         } else if (event.button === 0) {
-
+            const [canvas, _] = this._getCanvas();
+            canvas.addEventListener('mousemove', this._onMouseLeftMove);
+            canvas.addEventListener('mouseup', this._onMouseLeftUp);
+            console.log(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
+            this._currentTool.onStart(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
         }
     }
 
@@ -104,30 +117,30 @@ class Canvas extends Component<any, CanvasState> {
         this._lastMousePos = currentMousePos;
 
         const delta = diffPoints(currentMousePos, lastMousePos);
-        this._moveCamera(delta);
-        this._draw();
+        this._cameraControl!.moveCamera(delta);
     }
 
     private _onMouseLeftUp = (event: MouseEvent): void => {
         const [canvas, _] = this._getCanvas();
-        canvas.removeEventListener('mousemove', this._onMouseLeftMove);
+        this._currentTool.onEnd(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
+
+
         canvas.removeEventListener('mouseup', this._onMouseLeftUp);
+        canvas.removeEventListener('mousemove', this._onMouseLeftMove);
     }
 
     private _onMouseLeftMove = (event: MouseEvent): void => {
-        this._lastMousePos = { x: event.pageX, y: event.pageY };
+        this._currentTool.onMove(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
 
-        this._draw();
     }
 
     private _onWheel = (event: WheelEvent): void => {
         event.preventDefault();
         if (event.ctrlKey) {
-            this._zoom({ x: event.clientX, y: event.clientY }, event.deltaY)
+            this._cameraControl!.zoom({ x: event.pageX, y: event.pageY }, event.deltaY)
         } else {
-            this._moveCamera({ x: -event.deltaX, y: -event.deltaY });
+            this._cameraControl!.moveCamera({ x: -event.deltaX, y: -event.deltaY });
         }
-        this._draw();
     }
 
     private _onTouchStart = (event: TouchEvent): void => {
@@ -152,15 +165,13 @@ class Canvas extends Component<any, CanvasState> {
             const currentMousePos = middlePoint(p1, p2);
             this._lastMousePos = currentMousePos;
             const moveDelta = diffPoints(currentMousePos, lastMousePos);
-            this._moveCamera(moveDelta);
+            this._cameraControl!.moveCamera(moveDelta);
 
             const lastDistance = this._distance;
             const currentDistance = pointDistance(p1, p2);
             this._distance = currentDistance;
             const zoomDelta = currentDistance - lastDistance;
-            this._zoom(this._lastMousePos, -zoomDelta);
-
-            this._draw();
+            this._cameraControl!.zoom(this._lastMousePos, -zoomDelta);
         }
     }
 
@@ -169,47 +180,6 @@ class Canvas extends Component<any, CanvasState> {
         const [canvas, _] = this._getCanvas();
         canvas.addEventListener('touchmove', this._onTouchMove);
         canvas.addEventListener('touchend', this._onTouchEnd);
-    }
-
-    private _moveCamera = (delta: Point): void => {
-        const [_, context] = this._getCanvas();
-        const newOffset = addPoints(this._offset, delta);
-
-        const offsetDiff = scalePoint(
-            diffPoints(newOffset, this._offset),
-            this._scale
-        );
-        this._offset = newOffset;
-        this._viewport = diffPoints(this._viewport, offsetDiff);
-        context.translate(offsetDiff.x, offsetDiff.y);
-    }
-
-    private _zoom = (zoomCenter: Point, delta: number): void => {
-        const [canvas, context] = this._getCanvas();
-        const zoom = 1 - delta / ZOOM_SENSITIVITY;
-        const mousePos = diffPoints({ x: zoomCenter.x, y: zoomCenter.y }, { x: canvas.offsetLeft, y: canvas.offsetTop });
-        const viewportDelta = {
-            x: (mousePos.x / this._scale) * (1 - 1 / zoom),
-            y: (mousePos.y / this._scale) * (1 - 1 / zoom)
-        };
-        const newViewport = addPoints(
-            this._viewport,
-            viewportDelta
-        );
-
-        context.translate(this._viewport.x, this._viewport.y);
-        context.scale(zoom, zoom);
-        context.translate(-newViewport.x, -newViewport.y);
-
-        this._viewport = newViewport;
-        this._scale = this._scale * zoom;
-
-        const offsetDiff = scalePoint(
-            ORIGIN,
-            this._scale
-        );
-        context.translate(offsetDiff.x, offsetDiff.y);
-        this._viewport = diffPoints(this._viewport, offsetDiff);
     }
 
     render(): ReactNode {

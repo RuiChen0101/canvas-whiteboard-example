@@ -7,6 +7,7 @@ type TextProp = {
     text?: string;
     fontSize?: string;
     font?: string;
+    color?: string;
 }
 
 class Text implements Shape {
@@ -15,6 +16,7 @@ class Text implements Shape {
     private _text: string;
     private _fontSize: string;
     private _font: string;
+    private _color: string;
 
     constructor(prop?: TextProp) {
         this._width = prop?.width;
@@ -22,11 +24,15 @@ class Text implements Shape {
         this._text = prop?.text ?? "";
         this._font = prop?.font ?? "serif";
         this._fontSize = prop?.fontSize ?? "12px";
+        this._color = prop?.color ?? "#000";
     }
 
     draw(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): void {
         context.beginPath();
+        context.fillStyle = this._color;
         context.font = `${this._fontSize} ${this._font}`;
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
         context.fillText(this._text, this._pos.x, this._pos.y, this._width);
         context.closePath();
     }
