@@ -23,6 +23,14 @@ const middlePoint = (p1: Point, p2: Point): Point => {
     return { x: ~~((p1.x + p2.x) / 2), y: ~~((p1.y + p2.y) / 2) };
 }
 
+const isParallel = (p1: Point, p2: Point): boolean => {
+    return (p1.x * p2.y - p1.y * p2.x) === 0;
+}
+
+const isSameDirection = (p1: Point, p2: Point): boolean => {
+    return (p1.x * p2.x + p1.y * p2.y) >= 0;
+}
+
 const centerPoint = (p: Point, s: Size): Point => {
     return { x: p.x + ~~(s.w / 2), y: p.y + ~~(s.h / 2) };
 }
@@ -41,6 +49,8 @@ export {
     addPoints,
     scalePoint,
     middlePoint,
+    isParallel,
+    isSameDirection,
     centerPoint,
     pointDistance
 }

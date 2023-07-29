@@ -1,9 +1,9 @@
 import Tool from './tool';
 import Shape from '../shape/shape';
-import { ORIGIN, Point } from '../util/point';
 import Rectangle from '../shape/rectangle';
+import { ORIGIN, Point } from '../util/point';
 
-class SelectiveTool implements Tool {
+class SelectionTool implements Tool {
     private _startPos: Point = ORIGIN;
     private _endPos: Point = ORIGIN;
     private _activate: boolean = false;
@@ -32,4 +32,4 @@ class SelectiveTool implements Tool {
     }
 }
 
-export default SelectiveTool;
+export default SelectionTool;
