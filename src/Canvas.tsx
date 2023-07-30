@@ -10,9 +10,10 @@ import { Point, diffPoints, ORIGIN, middlePoint, pointDistance } from './util/po
 
 interface CanvasProps {
     cameraBound: Size;
-    onMouseDown: (pos: Point) => void;
+    onDragStart: (pos: Point) => void;
+    onDragMove: (pos: Point) => void;
+    onDragEnd: (pos: Point) => void;
     onMouseMove: (pos: Point) => void;
-    onMouseUp: (pos: Point) => void;
 }
 
 interface CanvasState {
@@ -115,7 +116,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
             canvas.addEventListener('mousemove', this._onMouseLeftMove);
             canvas.addEventListener('mouseup', this._onMouseLeftUp);
             canvas.addEventListener('mouseout', this._onMouseLeftUp);
-            this.props.onMouseDown(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
+            this.props.onDragStart(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
         }
     }
 
@@ -138,7 +139,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
 
     private _onMouseLeftUp = (event: MouseEvent): void => {
         const [canvas, _] = this._getCanvas();
-        this.props.onMouseUp(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
+        this.props.onDragEnd(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
 
         canvas.removeEventListener('mouseup', this._onMouseLeftUp);
         canvas.removeEventListener('mousemove', this._onMouseLeftMove);
@@ -146,7 +147,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
     }
 
     private _onMouseLeftMove = (event: MouseEvent): void => {
-        this.props.onMouseMove(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
+        this.props.onDragMove(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
     }
 
     private _onWheel = (event: WheelEvent): void => {
