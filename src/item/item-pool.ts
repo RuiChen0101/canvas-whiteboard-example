@@ -2,11 +2,17 @@ import Item from './item';
 import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
+import ItemInteractor from './item-interactor';
 import { Quadtree, Rectangle } from '../quadtree';
 
 class ItemPool {
+    private _selected?: ItemInteractor;
     private _items: { [key: string]: Item } = {};
     private _quadtree: Quadtree<Rectangle<string>>;
+
+    public get selected(): ItemInteractor | undefined {
+        return this._selected;
+    }
 
     public get items(): Item[] {
         return Object.values(this._items);
@@ -37,6 +43,19 @@ class ItemPool {
             result.push(this._items[o.data!]);
         }
         return result;
+    }
+
+    selectItem(pos: Point, size: Size): void {
+        const items = this.searchItem(pos, size);
+        if (items.length === 0) {
+            this.clearSelect();
+        } else {
+            this._selected = new ItemInteractor(items);
+        }
+    }
+
+    clearSelect(): void {
+        this._selected = undefined;
     }
 
     visit(visitor: Visitor): void {

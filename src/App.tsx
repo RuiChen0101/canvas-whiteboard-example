@@ -12,6 +12,7 @@ import DrawingVisitor from './visitor/drawing-visitor';
 
 interface AppState {
   currentTool: Tool;
+  cursorType: string;
 }
 
 class App extends Component<any, AppState> {
@@ -22,8 +23,12 @@ class App extends Component<any, AppState> {
     super(prop);
     this.state = {
       currentTool: new SelectionTool(this._itemPool),
+      cursorType: 'default',
     }
-    this._itemPool.addItem(new Booth({ id: '1', name: 'booth1', pos: { x: 100, y: 110 }, size: { w: 200, h: 300 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '1', name: 'booth1', pos: { x: 100, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 400, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '3', name: 'booth3', pos: { x: 100, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '4', name: 'booth4', pos: { x: 400, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
   }
 
   componentDidMount(): void {
@@ -37,31 +42,72 @@ class App extends Component<any, AppState> {
     }
     const shapes = drawVisitor.getResult();
     shapes.push(...this.state.currentTool.draw());
+    shapes.push(...(this._itemPool.selected?.draw() ?? []));
     this._canvasRef.current!.shapes = drawVisitor.getResult();
   }
 
   private _onDragStart = (pos: Point): void => {
-    this.state.currentTool.onStart(pos);
+    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(pos) !== "none") {
+      this._itemPool.selected.onStart(pos);
+    } else {
+      this.setState({ cursorType: "default" });
+      this.state.currentTool.onStart(pos);
+    }
     this._updateCanvas();
   }
 
   private _onDragEnd = (pos: Point): void => {
-    this.state.currentTool.onEnd(pos);
+    if (this._itemPool.selected?.isInteracting ?? false) {
+      this._itemPool.selected!.onEnd(pos);
+    } else {
+      this.state.currentTool.onEnd(pos);
+    }
     this._updateCanvas();
   }
 
   private _onDragMove = (pos: Point): void => {
-    this.state.currentTool.onMove(pos);
+    if (this._itemPool.selected?.isInteracting ?? false) {
+      this._itemPool.selected!.onMove(pos);
+    } else {
+      this.state.currentTool.onMove(pos);
+    }
     this._updateCanvas();
   }
 
   private _onMouseMove = (pos: Point): void => {
-
+    if (this._itemPool.selected !== undefined) {
+      switch (this._itemPool.selected.checkInteract(pos)) {
+        case "body":
+          this.setState({ cursorType: "move" });
+          break;
+        case "topLeft":
+          this.setState({ cursorType: "nw-resize" });
+          break;
+        case "topRight":
+          this.setState({ cursorType: "ne-resize" });
+          break;
+        case "bottomLeft":
+          this.setState({ cursorType: "sw-resize" });
+          break;
+        case "bottomRight":
+          this.setState({ cursorType: "se-resize" });
+          break;
+        case "rotate":
+          this.setState({ cursorType: "e-resize" });
+          break;
+        default:
+          this.setState({ cursorType: "default" });
+          break;
+      }
+      return;
+    }
   }
 
   render(): ReactNode {
     return (
-      <div id="app">
+      <div
+        id="app"
+        style={{ cursor: this.state.cursorType }}>
         <Canvas
           ref={this._canvasRef}
           cameraBound={{ w: 1920, h: 1080 }}

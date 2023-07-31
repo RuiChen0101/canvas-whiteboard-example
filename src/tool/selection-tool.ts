@@ -20,20 +20,21 @@ class SelectionTool implements Tool {
         this._activate = true;
         this._startPos = pos;
         this._endPos = pos;
-        const items = this._itemPool.searchItem(this._startPos, ZERO_SIZE);
+        this._itemPool.selectItem(this._startPos, ZERO_SIZE);
     }
 
     onMove(pos: Point): void {
         this._activate = true;
         this._endPos = pos;
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
-        const items = this._itemPool.searchItem(topLeft, size);
+        this._itemPool.selectItem(topLeft, size);
     }
 
     onEnd(pos: Point): void {
         this._activate = false;
         this._endPos = pos;
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
+        this._itemPool.selectItem(topLeft, size);
     }
 
     draw(): Shape[] {

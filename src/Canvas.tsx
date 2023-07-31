@@ -49,6 +49,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
         window.addEventListener('resize', this._onWindowsResize);
         canvas.addEventListener('wheel', this._onWheel);
         canvas.addEventListener('mousedown', this._onMouseDown);
+        canvas.addEventListener('mousemove', this._onMouseMove);
         canvas.addEventListener('touchstart', this._onTouchStart);
     }
 
@@ -58,6 +59,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
         window.removeEventListener('resize', this._onWindowsResize);
         canvas.removeEventListener('wheel', this._onWheel);
         canvas.removeEventListener('mousedown', this._onMouseDown);
+        canvas.removeEventListener('mousemove', this._onMouseMove);
         canvas.removeEventListener('touchstart', this._onTouchStart);
     }
 
@@ -103,6 +105,10 @@ class Canvas extends Component<CanvasProps, CanvasState> {
         }
     }
 
+    private _onMouseMove = (event: MouseEvent): void => {
+        this.props.onMouseMove(this._cameraControl!.toLocalPoint({ x: event.pageX, y: event.pageY }));
+    }
+
     private _onMouseDown = (event: MouseEvent): void => {
         if (event.button === 1) {
             const [canvas, _] = this._getCanvas();
@@ -143,7 +149,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
 
         canvas.removeEventListener('mouseup', this._onMouseLeftUp);
         canvas.removeEventListener('mousemove', this._onMouseLeftMove);
-        canvas.removeEventListener('mouseout', this._onMouseWheelUp);
+        canvas.removeEventListener('mouseout', this._onMouseLeftUp);
     }
 
     private _onMouseLeftMove = (event: MouseEvent): void => {
