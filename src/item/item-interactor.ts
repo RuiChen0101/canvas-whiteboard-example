@@ -3,7 +3,7 @@ import Shape from '../shape/shape';
 import Circle from '../shape/circle';
 import Rectangle from '../shape/rectangle';
 import { Size, ZERO_SIZE } from '../util/size';
-import { ORIGIN, Point, addPoints, diffPoints, downScalePoint, upScalePoint } from '../util/point';
+import { ORIGIN, Point, addPoints, diffPoints, downScalePoint, pointLength, upScalePoint } from '../util/point';
 
 enum InteractingType {
     Body,
@@ -20,7 +20,6 @@ class ItemInteractor {
     private readonly ANCHOR_SIZE: Size = Object.freeze({ w: 8, h: 8 });
 
     private _items: Item[] = [];
-    private _maxItemSize: Size = ZERO_SIZE;
 
     private _topLeft: Point = ORIGIN;
     private _topCenter: Point = ORIGIN;
@@ -112,28 +111,37 @@ class ItemInteractor {
         ];
     }
 
-    private _interactBody(delta: Point) {
+    private _interactBody(delta: Point): void {
         for (const i of this._items) {
             i.pos = addPoints(i.pos, delta);
         }
     }
 
-    private _interactTopLeft(delta: Point) {
+    private _interactTopLeft(delta: Point): void {
+        const s = 1 - (delta.x / this._size.w) - (delta.y / this._size.h);
+        const d = { x: this._size.w - (this._size.w * s), y: this._size.h - (this._size.h * s) };
         for (const i of this._items) {
-            const d = { x: delta.x * (i.size.w / this._maxItemSize.w), y: delta.y * (i.size.h / this._maxItemSize.h) };
-            if (i.size.w - d.x <= 10) { d.x = 0; }
-            if (i.size.h - d.y <= 10) { d.y = 0; }
             i.pos = addPoints(i.pos, d);
-            i.size = { w: i.size.w - d.x, h: i.size.h - d.y };
+            i.size = { w: i.size.w * s, h: i.size.h * s };
         }
     }
 
-    private _interactBottomRight(delta: Point) {
+    private _interactTopRight(delta: Point): void {
+        // for (const i of this._items) {
+        //     const d = { x: delta.x * (i.size.w / this._lockedMaxItemSize.w), y: delta.y * (i.size.h / this._lockedMaxItemSize.h) };
+        //     if (i.size.w - d.x <= 10) { d.x = 0; }
+        //     if (i.size.h - d.y <= 10) { d.y = 0; }
+        //     i.pos = addPoints(i.pos, d);
+        //     i.size = { w: i.size.w - d.x, h: i.size.h - d.y };
+        // }
+    }
+
+    private _interactBottomRight(delta: Point): void {
+        const s = 1.001;
+        const d = { x: this._topLeft.x - (this._topLeft.x * s), y: this._topLeft.y - (this._topLeft.y * s) };
         for (const i of this._items) {
-            const d = { x: delta.x * (i.size.w / this._maxItemSize.w), y: delta.y * (i.size.h / this._maxItemSize.h) };
-            if (i.size.w - d.x <= 10) { d.x = 0; }
-            if (i.size.h - d.y <= 10) { d.y = 0; }
-            i.size = { w: i.size.w + delta.x, h: i.size.h + delta.y };
+            // i.pos = addPoints(upScalePoint(i.pos, s), d);
+            i.size = { w: i.size.w * s, h: i.size.h * s };
         }
     }
 
@@ -141,15 +149,12 @@ class ItemInteractor {
         if (this._items.length === 0) return;
         const p1: Point = { ...this._items[0].pos };
         const p2: Point = { x: this._items[0].pos.x + this._items[0].size.w, y: this._items[0].pos.y + this._items[0].size.h };
-        const maxSize: Size = { ...this._items[0].size };
 
         for (const i of this._items) {
             p1.x = Math.min(p1.x, i.pos.x);
             p1.y = Math.min(p1.y, i.pos.y);
             p2.x = Math.max(p2.x, i.pos.x + i.size.w);
             p2.y = Math.max(p2.y, i.pos.y + i.size.h);
-            maxSize.w = Math.max(maxSize.w, i.size.w);
-            maxSize.h = Math.max(maxSize.h, i.size.h);
         }
 
         this._topLeft = { x: p1.x - this.PADDING, y: p1.y - this.PADDING };
@@ -158,7 +163,6 @@ class ItemInteractor {
         this._bottomLeft = { x: p1.x - this.PADDING, y: p2.y + this.PADDING };
         this._bottomRight = { x: p2.x + this.PADDING, y: p2.y + this.PADDING };
         this._size = { w: this._bottomRight.x - this._topLeft.x, h: this._bottomRight.y - this._topLeft.y };
-        this._maxItemSize = maxSize;
     }
 }
 

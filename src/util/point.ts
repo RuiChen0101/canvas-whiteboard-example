@@ -60,6 +60,10 @@ const pointDistance = (p1: Point, p2: Point): number => {
     return Math.hypot(p1.x - p2.x, p1.y - p2.y);
 }
 
+const pointLength = (p: Point): number => {
+    return Math.sqrt(p.x * p.x + p.y * p.y);
+}
+
 export type {
     Point
 }
@@ -75,5 +79,6 @@ export {
     isParallel,
     isSameDirection,
     centerPoint,
-    pointDistance
+    pointDistance,
+    pointLength
 }
