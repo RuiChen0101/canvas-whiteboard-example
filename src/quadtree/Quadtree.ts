@@ -67,7 +67,7 @@ export interface QuadtreeProps {
  * });
  * ```
  */
-export class Quadtree<ObjectsType extends Rectangle> {
+export class Quadtree<IdType> {
 
     /**
      * The numeric boundaries of this node.
@@ -101,14 +101,14 @@ export class Quadtree<ObjectsType extends Rectangle> {
      * @defaultValue `[]`
      * @readonly
      */
-    objects: ObjectsType[];
+    objects: Rectangle<IdType>[];
 
     /**
      * Subnodes of this node
      * @defaultValue `[]`
      * @readonly
      */
-    nodes: Quadtree<ObjectsType>[];
+    nodes: Quadtree<IdType>[];
 
     /**
      * Quadtree Constructor
@@ -145,7 +145,7 @@ export class Quadtree<ObjectsType extends Rectangle> {
      * @param obj - object to be checked
      * @returns Array containing indexes of intersecting subnodes (0-3 = top-right, top-left, bottom-left, bottom-right).
      */
-    getIndex(obj: Rectangle): number[] {
+    getIndex(obj: Rectangle<IdType>): number[] {
         return obj.qtIndex(this.bounds);
     }
 
@@ -203,7 +203,7 @@ export class Quadtree<ObjectsType extends Rectangle> {
      * 
      * @param obj - Object to be added.
      */
-    insert(obj: ObjectsType): void {
+    insert(obj: Rectangle<IdType>): void {
 
         //if we have subnodes, call insert on matching subnodes
         if (this.nodes.length) {
@@ -253,7 +253,7 @@ export class Quadtree<ObjectsType extends Rectangle> {
      * @param obj - geometry to be checked
      * @returns Array containing all detected objects.
      */
-    retrieve(obj: Rectangle): ObjectsType[] {
+    retrieve(obj: Rectangle<IdType>): Rectangle<IdType>[] {
 
         const indexes = this.getIndex(obj);
         let returnObjects = this.objects;
@@ -273,31 +273,30 @@ export class Quadtree<ObjectsType extends Rectangle> {
         return returnObjects;
     }
 
-    detectCollision(obj: Rectangle): ObjectsType[] {
+    detectCollision(obj: Rectangle<IdType>): Rectangle<IdType>[] {
         const objs = this.retrieve(obj);
         return objs.filter((o, _) => obj.isCollide(o));
     }
 
     // from https://github.com/jonit-dev/quadtree-ts
-    remove(obj: ObjectsType): void {
+    remove(id: string): void {
         // remove on nodes and all nested nodes
         for (let i = 0; i < this.nodes.length; i++) {
-            this.nodes[i].remove(obj);
+            this.nodes[i].remove(id);
         }
 
         // remove all related nodes
         this.nodes = this.nodes.filter((n) => n.objects.length);
 
         // remove objects
-        this.objects = this.objects.filter((o) => o !== obj);
+        this.objects = this.objects.filter((o) => o.id !== id);
     }
 
     // from https://github.com/jonit-dev/quadtree-ts
-    update(objectToUpdate: ObjectsType, updatedObject: ObjectsType): void {
-        this.remove(objectToUpdate);
+    update(id: string, updatedObject: Rectangle<IdType>): void {
+        this.remove(id);
         this.insert(updatedObject);
     }
-
 
     /**
      * Clear the Quadtree.

@@ -15,8 +15,12 @@ const addPoints = (p1: Point, p2: Point): Point => {
     return { x: p1.x + p2.x, y: p1.y + p2.y };
 }
 
-const scalePoint = (p1: Point, scale: number): Point => {
+const downScalePoint = (p1: Point, scale: number): Point => {
     return { x: p1.x / scale, y: p1.y / scale };
+}
+
+const upScalePoint = (p1: Point, scale: number): Point => {
+    return { x: p1.x * scale, y: p1.y * scale };
 }
 
 const middlePoint = (p1: Point, p2: Point): Point => {
@@ -64,7 +68,8 @@ export {
     ORIGIN,
     diffPoints,
     addPoints,
-    scalePoint,
+    downScalePoint,
+    upScalePoint,
     middlePoint,
     ensureTopLeftSize,
     isParallel,

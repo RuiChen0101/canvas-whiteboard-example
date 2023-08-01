@@ -23,7 +23,7 @@ class Description extends ItemBase implements Item {
     }
 
     visit(visitor: Visitor): void {
-
+        visitor.visitDescription(this)
     }
 }
 

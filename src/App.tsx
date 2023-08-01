@@ -9,6 +9,7 @@ import { Point } from './util/point';
 import ItemPool from './item/item-pool';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
+import { InteractingType } from './item/item-interactor';
 
 interface AppState {
   currentTool: Tool;
@@ -47,7 +48,7 @@ class App extends Component<any, AppState> {
   }
 
   private _onDragStart = (pos: Point): void => {
-    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(pos) !== "none") {
+    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(pos) !== InteractingType.None) {
       this._itemPool.selected.onStart(pos);
     } else {
       this.setState({ cursorType: "default" });
@@ -77,22 +78,22 @@ class App extends Component<any, AppState> {
   private _onMouseMove = (pos: Point): void => {
     if (this._itemPool.selected !== undefined) {
       switch (this._itemPool.selected.checkInteract(pos)) {
-        case "body":
+        case InteractingType.Body:
           this.setState({ cursorType: "move" });
           break;
-        case "topLeft":
+        case InteractingType.TopLeft:
           this.setState({ cursorType: "nw-resize" });
           break;
-        case "topRight":
+        case InteractingType.TopRight:
           this.setState({ cursorType: "ne-resize" });
           break;
-        case "bottomLeft":
+        case InteractingType.BottomLeft:
           this.setState({ cursorType: "sw-resize" });
           break;
-        case "bottomRight":
+        case InteractingType.BottomRight:
           this.setState({ cursorType: "se-resize" });
           break;
-        case "rotate":
+        case InteractingType.Rotate:
           this.setState({ cursorType: "e-resize" });
           break;
         default:

@@ -17,7 +17,7 @@ class Obstacle extends ItemBase implements Item {
     }
 
     visit(visitor: Visitor): void {
-
+        visitor.visitObstacle(this);
     }
 }
 

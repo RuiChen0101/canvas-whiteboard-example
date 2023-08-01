@@ -1,8 +1,14 @@
-import { Point } from '../util/point';
 import { Size } from '../util/size';
+import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
+import EventNotifier, { EventNotifierBase } from '../util/event';
 
-interface Item {
+enum ItemEvent {
+    Resize = 'resize',
+    Reposition = 'reposition'
+}
+
+interface Item extends EventNotifier {
     get id(): string;
     set id(id: string);
     get pos(): Point;
@@ -14,7 +20,7 @@ interface Item {
     visit(visitor: Visitor): void;
 }
 
-abstract class ItemBase implements Item {
+abstract class ItemBase extends EventNotifierBase implements Item {
     private _id: string;
     private _pos: Point;
     private _size: Size;
@@ -24,15 +30,22 @@ abstract class ItemBase implements Item {
     public set id(id: string) { this._id = id; }
 
     public get pos(): Point { return this._pos; }
-    public set pos(pos: Point) { this._pos = pos; }
+    public set pos(pos: Point) {
+        this._pos = pos;
+        this._emit(ItemEvent.Reposition, this._id);
+    }
 
     public get size(): Size { return this._size; }
-    public set size(size: Size) { this._size = size; }
+    public set size(size: Size) {
+        this._size = size;
+        this._emit(ItemEvent.Resize, this._id);
+    }
 
     public get rotate(): number { return this._rotate; }
     public set rotate(value: number) { this._rotate = value; }
 
     constructor(id: string, pos: Point, size: Size, rotate: number) {
+        super();
         this._id = id;
         this._pos = pos;
         this._size = size;
@@ -43,4 +56,7 @@ abstract class ItemBase implements Item {
 }
 
 export default Item;
-export { ItemBase };
+export {
+    ItemBase,
+    ItemEvent,
+};

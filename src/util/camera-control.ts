@@ -1,5 +1,5 @@
 import { Size, ZERO_SIZE, scaleSize } from './size';
-import { Point, addPoints, scalePoint, diffPoints, ORIGIN, isParallel, isSameDirection } from './point';
+import { Point, addPoints, downScalePoint, diffPoints, ORIGIN, isParallel, isSameDirection } from './point';
 
 type CameraControlProp = {
     context: CanvasRenderingContext2D;
@@ -56,11 +56,11 @@ class CameraControl {
     }
 
     public toLocalPoint(p: Point): Point {
-        return addPoints(scalePoint(p, this._scale), this._viewport);
+        return addPoints(downScalePoint(p, this._scale), this._viewport);
     }
 
     public moveCamera(delta: Point): void {
-        const viewportDiff = addPoints(scalePoint(this._boundTensionVector, this.OUTBOUND_MOVE_FRICTION), scalePoint(delta, this._scale));
+        const viewportDiff = addPoints(downScalePoint(this._boundTensionVector, this.OUTBOUND_MOVE_FRICTION), downScalePoint(delta, this._scale));
         if (isSameDirection(viewportDiff, delta)) {
             this._viewport = diffPoints(this._viewport, viewportDiff);
 
@@ -94,7 +94,7 @@ class CameraControl {
         this._viewSize = scaleSize(this._canvasSize, this._scale);
         this._lastPos = zoomCenter;
 
-        const viewportDiff = scalePoint(
+        const viewportDiff = downScalePoint(
             ORIGIN,
             this._scale
         );
@@ -129,7 +129,7 @@ class CameraControl {
             this.zoom(this._lastPos, -(this._scaleTension * this.OUTBOUND_ZOOM_ELASTIC));
         }
         if (Math.abs(this._boundTensionVector.x) >= 0.1 || Math.abs(this._boundTensionVector.y) >= 0.1) {
-            const viewportDiff = scalePoint(this._boundTensionVector, this.OUTBOUND_MOVE_ELASTIC);
+            const viewportDiff = downScalePoint(this._boundTensionVector, this.OUTBOUND_MOVE_ELASTIC);
             this.moveCamera(viewportDiff);
         }
     }

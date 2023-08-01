@@ -35,12 +35,12 @@ export interface RectangleGeometry {
  * @beta
  * @typeParam CustomDataType - Type of the custom data property (optional, inferred automatically).
  */
-export interface RectangleProps<CustomDataType = void> extends RectangleGeometry {
+export interface RectangleProps<IdType> extends RectangleGeometry {
 
     /**
      * Custom data
      */
-    data?: CustomDataType
+    id?: IdType;
 }
 
 /**
@@ -182,7 +182,7 @@ export interface RectangleProps<CustomDataType = void> extends RectangleGeometry
  * });
  * ```
  */
-export class Rectangle<CustomDataType = any> implements RectangleGeometry, Indexable {
+export class Rectangle<IdType> implements RectangleGeometry, Indexable {
 
     /**
      * X start of the rectangle (top left).
@@ -207,18 +207,18 @@ export class Rectangle<CustomDataType = any> implements RectangleGeometry, Index
     /**
      * Custom data.
      */
-    data?: CustomDataType;
+    id?: IdType;
 
-    constructor(props: RectangleProps<CustomDataType>) {
+    constructor(props: RectangleProps<IdType>) {
 
         this.x = props.x;
         this.y = props.y;
         this.width = props.width;
         this.height = props.height;
-        this.data = props.data;
+        this.id = props.id;
     }
 
-    isCollide(other: Rectangle): boolean {
+    isCollide(other: Rectangle<IdType>): boolean {
         const thisRight = this.x + this.width;
         const thisBottom = this.y + this.height;
         const otherRight = other.x + other.width;
