@@ -2,7 +2,7 @@ import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import Item, { ItemEvent } from './item';
-import ItemInteractor from './item-interactor';
+import ItemInteractor from '../interactor/item-interactor';
 import { Quadtree, Rectangle } from '../quadtree';
 
 class ItemPool {

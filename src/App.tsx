@@ -9,7 +9,7 @@ import { Point } from './util/point';
 import ItemPool from './item/item-pool';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
-import { InteractingType } from './item/item-interactor';
+import { InteractingType } from './interactor/item-interactor';
 
 interface AppState {
   currentTool: Tool;
