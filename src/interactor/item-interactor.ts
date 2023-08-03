@@ -3,9 +3,10 @@ import Shape from '../shape/shape';
 import Circle from '../shape/circle';
 import Rectangle from '../shape/rectangle';
 import { Size, ZERO_SIZE } from '../util/size';
-import { ORIGIN, Point, diffPoints } from '../util/point';
+import { ORIGIN, Point, centerPoint, diffPoints } from '../util/point';
 import MultiSelectInteractStrategy from './multi-select-interact-strategy';
 import SingleSelectInteractStrategy from './single-select-interact-strategy';
+import Rotate from '../shape/rotate';
 
 enum InteractingType {
     Body,
@@ -112,6 +113,9 @@ class ItemInteractor {
                 break;
             case InteractingType.BottomRight:
                 this._interactStrategy.interactBottomRight(this._context, this._items, currentPos);
+                break;
+            case InteractingType.Rotate:
+                this._interactStrategy.interactRotate(this._context, this._items, currentPos);
                 break;
         }
         this._context.lastPos = currentPos;

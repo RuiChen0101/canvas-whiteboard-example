@@ -1,4 +1,6 @@
+import { Point } from '../util/point';
 import type { NodeGeometry, Indexable } from './types';
+import { fourPointForRotatedRectangle } from '../util/bounding-box';
 
 /**
  * Rectangle Geometry
@@ -28,6 +30,8 @@ export interface RectangleGeometry {
      * Height of the rectangle.
      */
     height: number
+
+    rotate: number
 }
 
 /**
@@ -204,17 +208,19 @@ export class Rectangle<IdType> implements RectangleGeometry, Indexable {
      */
     height: number;
 
+    rotate: number;
+
     /**
      * Custom data.
      */
     id?: IdType;
 
     constructor(props: RectangleProps<IdType>) {
-
         this.x = props.x;
         this.y = props.y;
         this.width = props.width;
         this.height = props.height;
+        this.rotate = props.rotate;
         this.id = props.id;
     }
 
@@ -243,36 +249,61 @@ export class Rectangle<IdType> implements RectangleGeometry, Indexable {
      * @returns Array containing indexes of intersecting subnodes (0-3 = top-right, top-left, bottom-left, bottom-right)
      */
     qtIndex(node: NodeGeometry): number[] {
+        const [topLeft, topRight, bottomLeft, bottomRight] = fourPointForRotatedRectangle({ x: this.x, y: this.y }, { w: this.width, h: this.height }, this.rotate);
 
         const indexes: number[] = [],
-            boundsCenterX = node.x + (node.width / 2),
-            boundsCenterY = node.y + (node.height / 2);
+            w2 = node.width / 2,
+            h2 = node.height / 2,
+            x2 = node.x + w2,
+            y2 = node.y + h2;
 
-        const startIsNorth = this.y < boundsCenterY,
-            startIsWest = this.x < boundsCenterX,
-            endIsEast = this.x + this.width > boundsCenterX,
-            endIsSouth = this.y + this.height > boundsCenterY;
+        //an array of node origins where the array index equals the node index
+        const nodes = [
+            [x2, node.y],
+            [node.x, node.y],
+            [node.x, y2],
+            [x2, y2],
+        ];
 
-        //top-right quad
-        if (startIsNorth && endIsEast) {
-            indexes.push(0);
-        }
-
-        //top-left quad
-        if (startIsWest && startIsNorth) {
-            indexes.push(1);
-        }
-
-        //bottom-left quad
-        if (startIsWest && endIsSouth) {
-            indexes.push(2);
-        }
-
-        //bottom-right quad
-        if (endIsEast && endIsSouth) {
-            indexes.push(3);
+        //test all nodes for line intersections
+        for (let i = 0; i < nodes.length; i++) {
+            if (
+                Rectangle.intersectRect(topLeft, topRight, nodes[i][0], nodes[i][1], nodes[i][0] + w2, nodes[i][1] + h2) ||
+                Rectangle.intersectRect(topRight, bottomRight, nodes[i][0], nodes[i][1], nodes[i][0] + w2, nodes[i][1] + h2) ||
+                Rectangle.intersectRect(bottomRight, bottomLeft, nodes[i][0], nodes[i][1], nodes[i][0] + w2, nodes[i][1] + h2) ||
+                Rectangle.intersectRect(bottomLeft, topLeft, nodes[i][0], nodes[i][1], nodes[i][0] + w2, nodes[i][1] + h2)
+            ) {
+                indexes.push(i);
+            }
         }
 
         return indexes;
+    }
+
+    static intersectRect(p1: Point, p2: Point, minX: number, minY: number, maxX: number, maxY: number): boolean {
+
+        // Completely outside
+        if ((p1.x <= minX && p2.x <= minX) || (p1.y <= minY && p2.y <= minY) || (p1.x >= maxX && p2.x >= maxX) || (p1.y >= maxY && p2.y >= maxY))
+            return false;
+
+        // Single point inside
+        if ((p1.x >= minX && p1.x <= maxX && p1.y >= minY && p1.y <= maxY) || (p2.x >= minX && p2.x <= maxX && p2.y >= minY && p2.y <= maxY))
+            return true;
+
+        const m = (p2.y - p1.y) / (p2.x - p1.x);
+
+        let y = m * (minX - p1.x) + p1.y;
+        if (y > minY && y < maxY) return true;
+
+        y = m * (maxX - p1.x) + p1.y;
+        if (y > minY && y < maxY) return true;
+
+        let x = (minY - p1.y) / m + p1.x;
+        if (x > minX && x < maxX) return true;
+
+        x = (maxY - p1.y) / m + p1.x;
+        if (x > minX && x < maxX) return true;
+
+        return false;
     }
 }

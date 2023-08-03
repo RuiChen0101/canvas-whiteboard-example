@@ -1,7 +1,7 @@
 import Item from '../item/item';
 import InteractionStrategy from './interact-strategy';
 import { InteractorContext } from './item-interactor';
-import { Point, addPoints, diffPoints } from '../util/point';
+import { Point, addPoints, centerPoint, diffPoints, pointAngle } from '../util/point';
 
 class SingleSelectInteractStrategy implements InteractionStrategy {
     interactBody(ctx: InteractorContext, items: Item[], pos: Point): void {
@@ -36,6 +36,17 @@ class SingleSelectInteractStrategy implements InteractionStrategy {
         const delta = diffPoints(pos, ctx.lastPos);
         const i = items[0];
         i.size = { w: i.size.w + delta.x, h: i.size.h + delta.y };
+    }
+
+    interactRotate(ctx: InteractorContext, items: Item[], pos: Point): void {
+        const center = centerPoint(ctx.topLeft, ctx.size);
+        const v1 = diffPoints(center, ctx.topCenter);
+        const v2 = diffPoints(center, pos);
+
+        const degree = pointAngle(v1, v2);
+        console.log(degree);
+        const i = items[0];
+        i.rotate = degree;
     }
 }
 

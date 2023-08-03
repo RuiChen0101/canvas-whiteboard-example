@@ -50,6 +50,10 @@ class MultiSelectInteractStrategy implements InteractionStrategy {
             i.size = { w: i.size.w * s, h: i.size.h * s };
         }
     }
+
+    interactRotate(ctx: InteractorContext, items: Item[], pos: Point): void {
+
+    }
 }
 
 export default MultiSelectInteractStrategy;

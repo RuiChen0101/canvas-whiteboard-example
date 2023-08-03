@@ -8,6 +8,7 @@ interface InteractStrategy {
     interactTopRight(ctx: InteractorContext, items: Item[], pos: Point): void;
     interactBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void;
     interactBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void;
+    interactRotate(ctx: InteractorContext, items: Item[], pos: Point): void;
 }
 
 export default InteractStrategy;

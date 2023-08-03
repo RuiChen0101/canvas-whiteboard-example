@@ -42,7 +42,10 @@ abstract class ItemBase extends EventNotifierBase implements Item {
     }
 
     public get rotate(): number { return this._rotate; }
-    public set rotate(value: number) { this._rotate = value; }
+    public set rotate(value: number) {
+        this._rotate = value;
+        this._emit(ItemEvent.Resize, this._id);
+    }
 
     constructor(id: string, pos: Point, size: Size, rotate: number) {
         super();
