@@ -1,6 +1,6 @@
 import { Point } from '../util/point';
 import type { NodeGeometry, Indexable } from './types';
-import { fourPointForRotatedRectangle } from '../util/bounding-box';
+import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 
 /**
  * Rectangle Geometry
@@ -225,22 +225,17 @@ export class Rectangle<IdType> implements RectangleGeometry, Indexable {
     }
 
     isCollide(other: Rectangle<IdType>): boolean {
-        const thisRight = this.x + this.width;
-        const thisBottom = this.y + this.height;
-        const otherRight = other.x + other.width;
-        const otherBottom = other.y + other.height;
+        const result = isRectangleCollide(
+            { x: this.x, y: this.y }, { w: this.width, h: this.height }, this.rotate,
+            { x: other.x, y: other.y }, { w: other.width, h: other.height }, other.rotate
+        );
 
-        // Check if the rectangles overlap along the X-axis
-        if (this.x < otherRight && thisRight > other.x) {
-            // Check if the rectangles overlap along the Y-axis
-            if (this.y < otherBottom && thisBottom > other.y) {
-                // If both overlap on both axes, they collide
-                return true;
-            }
+        if (other.id === "14" && result) {
+            console.log(other)
+            console.log(this)
         }
 
-        // If there is no overlap along either axis, they don't collide
-        return false;
+        return result;
     }
 
     /**
@@ -249,7 +244,7 @@ export class Rectangle<IdType> implements RectangleGeometry, Indexable {
      * @returns Array containing indexes of intersecting subnodes (0-3 = top-right, top-left, bottom-left, bottom-right)
      */
     qtIndex(node: NodeGeometry): number[] {
-        const [topLeft, topRight, bottomLeft, bottomRight] = fourPointForRotatedRectangle({ x: this.x, y: this.y }, { w: this.width, h: this.height }, this.rotate);
+        const [topLeft, topRight, bottomLeft, bottomRight] = fourCornerForRotatedRectangle({ x: this.x, y: this.y }, { w: this.width, h: this.height }, this.rotate);
 
         const indexes: number[] = [],
             w2 = node.width / 2,

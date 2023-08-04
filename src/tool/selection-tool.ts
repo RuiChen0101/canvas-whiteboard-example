@@ -1,9 +1,8 @@
 import Tool from './tool';
 import Shape from '../shape/shape';
+import ItemPool from '../item/item-pool';
 import Rectangle from '../shape/rectangle';
 import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
-import ItemPool from '../item/item-pool';
-import { ZERO_SIZE } from '../util/size';
 
 class SelectionTool implements Tool {
     private _startPos: Point = ORIGIN;
@@ -20,7 +19,7 @@ class SelectionTool implements Tool {
         this._activate = true;
         this._startPos = pos;
         this._endPos = pos;
-        this._itemPool.selectItem(this._startPos, ZERO_SIZE);
+        this._itemPool.selectItem(this._startPos, { w: 1, h: 1 });
     }
 
     onMove(pos: Point): void {
@@ -34,7 +33,7 @@ class SelectionTool implements Tool {
         this._activate = false;
         this._endPos = pos;
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
-        this._itemPool.selectItem(topLeft, size);
+        this._itemPool.selectItem(topLeft, { w: size.w < 1 ? 1 : size.w, h: size.h < 1 ? 1 : size.h });
     }
 
     draw(): Shape[] {

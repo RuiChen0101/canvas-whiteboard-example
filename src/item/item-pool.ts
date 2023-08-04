@@ -34,12 +34,13 @@ class ItemPool {
             y: item.pos.y,
             width: item.size.w,
             height: item.size.h,
+            rotate: item.rotate,
             id: item.id,
         }));
     }
 
     searchItem(pos: Point, size: Size): Item[] {
-        const objs = this._quadtree.detectCollision(new Rectangle<string>({ x: pos.x, y: pos.y, width: size.w, height: size.h, }));
+        const objs = this._quadtree.detectCollision(new Rectangle<string>({ x: pos.x, y: pos.y, width: size.w, height: size.h, rotate: 0 }));
         const result: Item[] = [];
         for (const o of objs) {
             result.push(this._items[o.id!]);
@@ -52,6 +53,8 @@ class ItemPool {
         if (items.length === 0) {
             this.clearSelect();
         } else {
+            // console.log(pos, size);
+            // console.log(items);
             this._selected = new ItemInteractor(items);
         }
     }
@@ -78,6 +81,7 @@ class ItemPool {
             y: item.pos.y,
             width: item.size.w,
             height: item.size.h,
+            rotate: item.rotate,
             id: item.id,
         }));
     }

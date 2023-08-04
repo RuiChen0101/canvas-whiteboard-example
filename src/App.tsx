@@ -28,8 +28,19 @@ class App extends Component<any, AppState> {
     }
     this._itemPool.addItem(new Booth({ id: '1', name: 'booth1', pos: { x: 100, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
     this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 400, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '3', name: 'booth3', pos: { x: 100, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '4', name: 'booth4', pos: { x: 400, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '3', name: 'booth3', pos: { x: 700, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '4', name: 'booth4', pos: { x: 1000, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '5', name: 'booth5', pos: { x: 1300, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '6', name: 'booth6', pos: { x: 100, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '7', name: 'booth7', pos: { x: 400, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '8', name: 'booth8', pos: { x: 700, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '9', name: 'booth9', pos: { x: 1000, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '10', name: 'booth10', pos: { x: 1300, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '11', name: 'booth11', pos: { x: 100, y: 500 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '12', name: 'booth12', pos: { x: 400, y: 500 }, size: { w: 200, h: 100 }, rotate: -45 }));
+    this._itemPool.addItem(new Booth({ id: '13', name: 'booth13', pos: { x: 700, y: 500 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '14', name: 'booth14', pos: { x: 1000, y: 500 }, size: { w: 200, h: 100 }, rotate: 45 }));
+    this._itemPool.addItem(new Booth({ id: '15', name: 'booth15', pos: { x: 1300, y: 500 }, size: { w: 200, h: 100 }, rotate: 0 }));
   }
 
   componentDidMount(): void {

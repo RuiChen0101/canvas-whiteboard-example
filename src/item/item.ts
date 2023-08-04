@@ -2,6 +2,7 @@ import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import EventNotifier, { EventNotifierBase } from '../util/event';
+import { boundingBoxForRotatedRectangle } from '../util/bounding-box';
 
 enum ItemEvent {
     Resize = 'resize',
@@ -17,6 +18,7 @@ interface Item extends EventNotifier {
     set size(size: Size);
     get rotate(): number;
     set rotate(value: number);
+    get boundingBox(): [Point, Point];
     visit(visitor: Visitor): void;
 }
 
@@ -45,6 +47,10 @@ abstract class ItemBase extends EventNotifierBase implements Item {
     public set rotate(value: number) {
         this._rotate = value;
         this._emit(ItemEvent.Resize, this._id);
+    }
+
+    public get boundingBox(): [Point, Point] {
+        return boundingBoxForRotatedRectangle(this._pos, this._size, this._rotate);
     }
 
     constructor(id: string, pos: Point, size: Size, rotate: number) {

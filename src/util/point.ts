@@ -56,6 +56,20 @@ const centerPoint = (p: Point, s: Size): Point => {
     return { x: p.x + (s.w / 2), y: p.y + (s.h / 2) };
 }
 
+const rotatePoint = (p: Point, anchor: Point, degree: number): Point => {
+    const angleRad = degree * (Math.PI / 180);
+
+    const cosA = Math.cos(angleRad);
+    const sinA = Math.sin(angleRad);
+
+    const op = diffPoints(p, anchor);
+
+    return {
+        x: op.x * cosA - op.y * sinA + anchor.x,
+        y: op.x * sinA + op.y * cosA + anchor.y
+    }
+}
+
 const pointDistance = (p1: Point, p2: Point): number => {
     return Math.hypot(p1.x - p2.x, p1.y - p2.y);
 }
@@ -84,6 +98,7 @@ export {
     isParallel,
     isSameDirection,
     centerPoint,
+    rotatePoint,
     pointDistance,
     pointAngle,
     pointLength
