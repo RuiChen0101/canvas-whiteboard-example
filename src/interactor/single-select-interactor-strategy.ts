@@ -5,7 +5,7 @@ import Rotate from '../shape/rotate';
 import Rectangle from '../shape/rectangle';
 import InteractorStrategy from './interactor-strategy';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, PADDING } from './item-interactor';
-import { Point, addPoints, centerPoint, diffPoints, pointAngle, rotatePoint } from '../util/point';
+import { Point, addPoints, centerPoint, diffPoints, middlePoint, pointAngle, rotatePoint } from '../util/point';
 import { fourCornerForRotatedRectangle } from '../util/bounding-box';
 
 class SingleSelectInteractorStrategy implements InteractorStrategy {
@@ -30,8 +30,6 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         const s = { w: ctx.size.w + (PADDING * 2), h: ctx.size.h + (PADDING * 2) };
         const [topLeft, topRight, bottomRight, bottomLeft] = fourCornerForRotatedRectangle(p, s, items[0].rotate);
         const topCenter = rotatePoint({ x: ctx.topCenter.x, y: ctx.topCenter.y - PADDING - 10 }, centerPoint(ctx.topLeft, ctx.size), items[0].rotate);
-        // console.log(topCenter, pos);
-
 
         if (topLeft.x - 6 <= pos.x && topLeft.x + 6 >= pos.x && topLeft.y - 6 <= pos.y && topLeft.y + 6 >= pos.y) {
             return InteractingType.TopLeft;
@@ -62,30 +60,51 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
     }
 
     interactTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
         const i = items[0];
-        i.pos = addPoints(i.pos, delta);
-        i.size = { w: i.size.w - delta.x, h: i.size.h - delta.y };
+        const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
+        const delta = diffPoints(pos, ctx.lastPos);
+        const rtl = addPoints(topLeft, delta);
+        const newCenter = middlePoint(bottomRight, rtl);
+        const newTopLeft = rotatePoint(rtl, newCenter, -i.rotate);
+        const newBottomRight = rotatePoint(bottomRight, newCenter, -i.rotate);
+        i.pos = newTopLeft;
+        i.size = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
     }
 
     interactTopRight(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
         const i = items[0];
-        i.pos = { x: i.pos.x, y: i.pos.y + delta.y };
-        i.size = { w: i.size.w + delta.x, h: i.size.h - delta.y };
+        const [_topLeft, topRight, _bottomRight, bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
+        const delta = diffPoints(pos, ctx.lastPos);
+        const rtr = addPoints(topRight, delta);
+        const newCenter = middlePoint(bottomLeft, rtr);
+        const newTopRight = rotatePoint(rtr, newCenter, -i.rotate);
+        const newBottomLeft = rotatePoint(bottomLeft, newCenter, -i.rotate);
+        i.pos = { x: newBottomLeft.x, y: newTopRight.y }
+        i.size = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
     }
 
     interactBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
         const i = items[0];
-        i.pos = { x: i.pos.x + delta.x, y: i.pos.y };
-        i.size = { w: i.size.w - delta.x, h: i.size.h + delta.y };
+        const [_topLeft, topRight, _bottomRight, bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
+        const delta = diffPoints(pos, ctx.lastPos);
+        const rbl = addPoints(bottomLeft, delta);
+        const newCenter = middlePoint(topRight, rbl);
+        const newTopRight = rotatePoint(topRight, newCenter, -i.rotate);
+        const newBottomLeft = rotatePoint(rbl, newCenter, -i.rotate);
+        i.pos = { x: newBottomLeft.x, y: newTopRight.y }
+        i.size = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
     }
 
     interactBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
         const i = items[0];
-        i.size = { w: i.size.w + delta.x, h: i.size.h + delta.y };
+        const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
+        const delta = diffPoints(pos, ctx.lastPos);
+        const rbr = addPoints(bottomRight, delta);
+        const newCenter = middlePoint(topLeft, rbr);
+        const newTopLeft = rotatePoint(topLeft, newCenter, -i.rotate);
+        const newBottomRight = rotatePoint(rbr, newCenter, -i.rotate);
+        i.pos = newTopLeft;
+        i.size = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
     }
 
     interactRotate(ctx: InteractorContext, items: Item[], pos: Point): void {
@@ -94,7 +113,6 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         const v2 = diffPoints(center, pos);
 
         const degree = pointAngle(v1, v2);
-        console.log(degree);
         const i = items[0];
         i.rotate = degree;
     }

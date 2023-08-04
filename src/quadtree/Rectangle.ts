@@ -230,11 +230,6 @@ export class Rectangle<IdType> implements RectangleGeometry, Indexable {
             { x: other.x, y: other.y }, { w: other.width, h: other.height }, other.rotate
         );
 
-        if (other.id === "14" && result) {
-            console.log(other)
-            console.log(this)
-        }
-
         return result;
     }
 
