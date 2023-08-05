@@ -53,10 +53,17 @@ class ItemPool {
         if (items.length === 0) {
             this.clearSelect();
         } else {
-            // console.log(pos, size);
-            // console.log(items);
             this._selected = new ItemInteractor(items);
         }
+    }
+
+    deleteSelectedItem(): void {
+        if (this._selected === undefined) return;
+        for (const i of this._selected.items) {
+            delete this._items[i.id];
+            this._quadtree.remove(i.id);
+        }
+        this.clearSelect();
     }
 
     clearSelect(): void {

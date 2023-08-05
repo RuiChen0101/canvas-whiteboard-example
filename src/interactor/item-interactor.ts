@@ -1,12 +1,9 @@
 import Item from '../item/item';
 import Shape from '../shape/shape';
-import Circle from '../shape/circle';
-import Rectangle from '../shape/rectangle';
+import { ORIGIN, Point } from '../util/point';
 import { Size, ZERO_SIZE } from '../util/size';
-import { ORIGIN, Point, centerPoint, diffPoints } from '../util/point';
 import MultiSelectInteractStrategy from './multi-select-interactor-strategy';
 import SingleSelectInteractStrategy from './single-select-interactor-strategy';
-import Rotate from '../shape/rotate';
 
 enum InteractingType {
     Body,
@@ -32,9 +29,6 @@ const PADDING: number = 10;
 const ANCHOR_SIZE: Size = Object.freeze({ w: 8, h: 8 });
 
 class ItemInteractor {
-    private readonly PADDING: number = 10;
-    private readonly ANCHOR_SIZE: Size = Object.freeze({ w: 8, h: 8 });
-
     private _items: Item[] = [];
 
     private _context: InteractorContext = {
@@ -50,6 +44,10 @@ class ItemInteractor {
     private _strategy;
 
     private _interact: InteractingType = InteractingType.None;
+
+    public get items(): Item[] {
+        return this._items;
+    }
 
     public get isInteracting(): boolean {
         return this._interact !== InteractingType.None;
@@ -79,31 +77,27 @@ class ItemInteractor {
     onMove(pos: Point): void {
         if (this._interact === InteractingType.None) return;
 
-        const lastPos = this._context.lastPos;
-        const currentPos = { ...pos };
-
-        const delta = diffPoints(currentPos, lastPos);
         switch (this._interact) {
             case InteractingType.Body:
-                this._strategy.interactBody(this._context, this._items, currentPos);
+                this._strategy.interactBody(this._context, this._items, pos);
                 break;
             case InteractingType.TopLeft:
-                this._strategy.interactTopLeft(this._context, this._items, currentPos);
+                this._strategy.interactTopLeft(this._context, this._items, pos);
                 break;
             case InteractingType.TopRight:
-                this._strategy.interactTopRight(this._context, this._items, currentPos);
+                this._strategy.interactTopRight(this._context, this._items, pos);
                 break;
             case InteractingType.BottomLeft:
-                this._strategy.interactBottomLeft(this._context, this._items, currentPos);
+                this._strategy.interactBottomLeft(this._context, this._items, pos);
                 break;
             case InteractingType.BottomRight:
-                this._strategy.interactBottomRight(this._context, this._items, currentPos);
+                this._strategy.interactBottomRight(this._context, this._items, pos);
                 break;
             case InteractingType.Rotate:
-                this._strategy.interactRotate(this._context, this._items, currentPos);
+                this._strategy.interactRotate(this._context, this._items, pos);
                 break;
         }
-        this._context.lastPos = currentPos;
+        this._context.lastPos = { ...pos };
 
         this._inferPosAndSize();
     }

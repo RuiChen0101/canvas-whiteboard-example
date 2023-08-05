@@ -3,8 +3,8 @@ import Shape from '../shape/shape';
 import Circle from '../shape/circle';
 import Rectangle from '../shape/rectangle';
 import InteractorStrategy from './interactor-strategy';
-import { Point, addPoints, diffPoints, upScalePoint } from '../util/point';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, PADDING } from './item-interactor';
+import { Point, addPoints, centerPoint, diffPoints, pointAngle, rotatePoint, upScalePoint } from '../util/point';
 
 class MultiSelectInteractorStrategy implements InteractorStrategy {
     drawIndicator(ctx: InteractorContext, items: Item[]): Shape[] {
@@ -51,6 +51,7 @@ class MultiSelectInteractorStrategy implements InteractorStrategy {
         const delta = diffPoints(pos, ctx.topLeft);
         const s = (delta.x * (ctx.size.w / ctx.size.h)) <= delta.y ? 1 - (delta.x / ctx.size.w) : 1 - (delta.y / ctx.size.h);
         const d = { x: ctx.bottomRight.x - (ctx.bottomRight.x * s), y: ctx.bottomRight.y - (ctx.bottomRight.y * s) };
+        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
             i.pos = addPoints(upScalePoint(i.pos, s), d);
             i.size = { w: i.size.w * s, h: i.size.h * s };
@@ -61,6 +62,7 @@ class MultiSelectInteractorStrategy implements InteractorStrategy {
         const delta = diffPoints(pos, ctx.topRight);
         const s = (delta.x * -(ctx.size.w / ctx.size.h)) <= delta.y ? 1 + (delta.x / ctx.size.w) : 1 - (delta.y / ctx.size.h);
         const d = { x: ctx.bottomLeft.x - (ctx.bottomLeft.x * s), y: ctx.bottomLeft.y - (ctx.bottomLeft.y * s) };
+        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
             i.pos = addPoints(upScalePoint(i.pos, s), d);
             i.size = { w: i.size.w * s, h: i.size.h * s };
@@ -71,6 +73,7 @@ class MultiSelectInteractorStrategy implements InteractorStrategy {
         const delta = diffPoints(pos, ctx.bottomLeft);
         const s = (delta.x * -(ctx.size.w / ctx.size.h)) > delta.y ? 1 - (delta.x / ctx.size.w) : 1 + (delta.y / ctx.size.h);
         const d = { x: ctx.topRight.x - (ctx.topRight.x * s), y: ctx.topRight.y - (ctx.topRight.y * s) };
+        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
             i.pos = addPoints(upScalePoint(i.pos, s), d);
             i.size = { w: i.size.w * s, h: i.size.h * s };
@@ -81,6 +84,7 @@ class MultiSelectInteractorStrategy implements InteractorStrategy {
         const delta = diffPoints(pos, ctx.bottomRight);
         const s = (delta.x * (ctx.size.w / ctx.size.h)) > delta.y ? 1 + (delta.x / ctx.size.w) : 1 + (delta.y / ctx.size.h);
         const d = { x: ctx.topLeft.x - (ctx.topLeft.x * s), y: ctx.topLeft.y - (ctx.topLeft.y * s) };
+        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
             i.pos = addPoints(upScalePoint(i.pos, s), d);
             i.size = { w: i.size.w * s, h: i.size.h * s };
@@ -88,7 +92,16 @@ class MultiSelectInteractorStrategy implements InteractorStrategy {
     }
 
     interactRotate(ctx: InteractorContext, items: Item[], pos: Point): void {
+        const center = centerPoint(ctx.topLeft, ctx.size);
+        const v1 = diffPoints(center, ctx.lastPos);
+        const v2 = diffPoints(center, pos);
 
+        const degree = pointAngle(v1, v2);
+
+        for (const i of items) {
+            i.pos = diffPoints(rotatePoint(centerPoint(i.pos, i.size), center, degree), { x: i.size.w / 2, y: i.size.h / 2 });
+            i.rotate = i.rotate + degree;
+        }
     }
 
     inferPosAndSize(ctx: InteractorContext, items: Item[]): InteractorContext {

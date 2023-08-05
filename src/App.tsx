@@ -9,7 +9,7 @@ import { Point } from './util/point';
 import ItemPool from './item/item-pool';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
-import { InteractingType } from './interactor/item-interactor';
+import ItemInteractor, { InteractingType } from './interactor/item-interactor';
 
 interface AppState {
   currentTool: Tool;
@@ -45,6 +45,11 @@ class App extends Component<any, AppState> {
 
   componentDidMount(): void {
     this._updateCanvas();
+    window.addEventListener('keydown', this._onKeyboardDown);
+  }
+
+  componentWillUnmount(): void {
+    window.removeEventListener('keydown', this._onKeyboardDown);
   }
 
   private _updateCanvas = (): void => {
@@ -56,6 +61,13 @@ class App extends Component<any, AppState> {
     shapes.push(...this.state.currentTool.draw());
     shapes.push(...(this._itemPool.selected?.draw() ?? []));
     this._canvasRef.current!.shapes = drawVisitor.getResult();
+  }
+
+  private _onKeyboardDown = (e: KeyboardEvent): void => {
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      this._itemPool.deleteSelectedItem();
+      this._updateCanvas();
+    }
   }
 
   private _onDragStart = (pos: Point): void => {

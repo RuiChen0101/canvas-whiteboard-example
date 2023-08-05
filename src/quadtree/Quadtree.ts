@@ -285,9 +285,6 @@ export class Quadtree<IdType> {
             this.nodes[i].remove(id);
         }
 
-        // remove all related nodes
-        this.nodes = this.nodes.filter((n) => n.objects.length);
-
         // remove objects
         this.objects = this.objects.filter((o) => o.id !== id);
     }

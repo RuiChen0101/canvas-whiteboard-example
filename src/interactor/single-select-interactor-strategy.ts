@@ -5,7 +5,7 @@ import Rotate from '../shape/rotate';
 import Rectangle from '../shape/rectangle';
 import InteractorStrategy from './interactor-strategy';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, PADDING } from './item-interactor';
-import { Point, addPoints, centerPoint, diffPoints, middlePoint, pointAngle, rotatePoint } from '../util/point';
+import { Point, addPoints, centerPoint, diffPoints, ensureTopLeftSize, middlePoint, pointAngle, rotatePoint } from '../util/point';
 import { fourCornerForRotatedRectangle } from '../util/bounding-box';
 
 class SingleSelectInteractorStrategy implements InteractorStrategy {
@@ -67,8 +67,10 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         const newCenter = middlePoint(bottomRight, rtl);
         const newTopLeft = rotatePoint(rtl, newCenter, -i.rotate);
         const newBottomRight = rotatePoint(bottomRight, newCenter, -i.rotate);
+        const newSize = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
+        if (newSize.w <= 1 || newSize.h <= 1) return;
         i.pos = newTopLeft;
-        i.size = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
+        i.size = newSize;
     }
 
     interactTopRight(ctx: InteractorContext, items: Item[], pos: Point): void {
@@ -79,8 +81,10 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         const newCenter = middlePoint(bottomLeft, rtr);
         const newTopRight = rotatePoint(rtr, newCenter, -i.rotate);
         const newBottomLeft = rotatePoint(bottomLeft, newCenter, -i.rotate);
+        const newSize = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
+        if (newSize.w <= 1 || newSize.h <= 1) return;
         i.pos = { x: newBottomLeft.x, y: newTopRight.y }
-        i.size = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
+        i.size = newSize;
     }
 
     interactBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
@@ -91,8 +95,10 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         const newCenter = middlePoint(topRight, rbl);
         const newTopRight = rotatePoint(topRight, newCenter, -i.rotate);
         const newBottomLeft = rotatePoint(rbl, newCenter, -i.rotate);
+        const newSize = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
+        if (newSize.w <= 1 || newSize.h <= 1) return;
         i.pos = { x: newBottomLeft.x, y: newTopRight.y }
-        i.size = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
+        i.size = newSize;
     }
 
     interactBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void {
@@ -103,13 +109,15 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         const newCenter = middlePoint(topLeft, rbr);
         const newTopLeft = rotatePoint(topLeft, newCenter, -i.rotate);
         const newBottomRight = rotatePoint(rbr, newCenter, -i.rotate);
+        const newSize = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
+        if (newSize.w <= 1 || newSize.h <= 1) return;
         i.pos = newTopLeft;
-        i.size = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
+        i.size = newSize;
     }
 
     interactRotate(ctx: InteractorContext, items: Item[], pos: Point): void {
         const center = centerPoint(ctx.topLeft, ctx.size);
-        const v1 = diffPoints(center, ctx.topCenter);
+        const v1 = { x: 0, y: 1 }
         const v2 = diffPoints(center, pos);
 
         const degree = pointAngle(v1, v2);
