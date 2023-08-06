@@ -6,26 +6,29 @@ import './App.css';
 import Tool from './tool/tool';
 import Booth from './item/booth';
 import { Point } from './util/point';
+import Toolbox from './overlay/Toolbox';
 import ItemPool from './item/item-pool';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
-import ItemInteractor, { InteractingType } from './interactor/item-interactor';
+import { InteractingType } from './interactor/item-interactor';
 
 interface AppState {
-  currentTool: Tool;
+  currentTool: string;
   cursorType: string;
 }
 
 class App extends Component<any, AppState> {
   private _canvasRef = createRef<Canvas>();
   private _itemPool: ItemPool = new ItemPool({ w: 1920, h: 1080 });
+  private _currentTool: Tool;
 
   constructor(prop: any) {
     super(prop);
     this.state = {
-      currentTool: new SelectionTool(this._itemPool),
+      currentTool: 'select',
       cursorType: 'default',
     }
+    this._currentTool = new SelectionTool(this._itemPool);
     this._itemPool.addItem(new Booth({ id: '1', name: 'booth1', pos: { x: 100, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
     this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 400, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
     this._itemPool.addItem(new Booth({ id: '3', name: 'booth3', pos: { x: 700, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
@@ -58,7 +61,7 @@ class App extends Component<any, AppState> {
       i.visit(drawVisitor);
     }
     const shapes = drawVisitor.getResult();
-    shapes.push(...this.state.currentTool.draw());
+    shapes.push(...this._currentTool.draw());
     shapes.push(...(this._itemPool.selected?.draw() ?? []));
     this._canvasRef.current!.shapes = drawVisitor.getResult();
   }
@@ -75,7 +78,7 @@ class App extends Component<any, AppState> {
       this._itemPool.selected.onStart(pos);
     } else {
       this.setState({ cursorType: "default" });
-      this.state.currentTool.onStart(pos);
+      this._currentTool.onStart(pos);
     }
     this._updateCanvas();
   }
@@ -84,7 +87,7 @@ class App extends Component<any, AppState> {
     if (this._itemPool.selected?.isInteracting ?? false) {
       this._itemPool.selected!.onEnd(pos);
     } else {
-      this.state.currentTool.onEnd(pos);
+      this._currentTool.onEnd(pos);
     }
     this._updateCanvas();
   }
@@ -93,7 +96,7 @@ class App extends Component<any, AppState> {
     if (this._itemPool.selected?.isInteracting ?? false) {
       this._itemPool.selected!.onMove(pos);
     } else {
-      this.state.currentTool.onMove(pos);
+      this._currentTool.onMove(pos);
     }
     this._updateCanvas();
   }
@@ -127,11 +130,19 @@ class App extends Component<any, AppState> {
     }
   }
 
+  private _onToolChange = (toolName: string): void => {
+    console.log(toolName);
+    this.setState({
+      currentTool: toolName
+    })
+  }
+
   render(): ReactNode {
     return (
       <div
         id="app"
         style={{ cursor: this.state.cursorType }}>
+        <Toolbox currentTool={this.state.currentTool} onToolChange={this._onToolChange} />
         <Canvas
           ref={this._canvasRef}
           cameraBound={{ w: 1920, h: 1080 }}

@@ -1,0 +1,35 @@
+.toolbox-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 9;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+
+    .toolbox {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px;
+        background-color: #fff;
+        border-radius: 5px;
+
+        .tool {
+            width: 100%;
+            margin: 4px 0px;
+            padding: 8px;
+            display: flex;
+            justify-content: center;
+            border-radius: 5px;
+
+            &:hover,
+            &.active {
+                padding: 6px;
+                border: 2px solid #0d6efd;
+            }
+        }
+    }
+}
