@@ -1,25 +1,16 @@
-import { Size } from '../util/size';
-import { Point } from '../util/point';
-import Item, { ItemBase } from './item';
 import Visitor from '../visitor/visitor';
+import { ItemBase, ItemState } from './item';
 
-type DescriptionProp = {
-    id: string,
-    pos: Point,
-    size: Size,
-    rotate: number,
-    text: string,
+interface DescriptionState extends ItemState {
+    text: string;
 }
 
-class Description extends ItemBase implements Item {
-    private _text: string;
+class Description extends ItemBase<DescriptionState> {
+    public get text(): string { return this._state.text; }
+    public set text(value: string) { this._state.text = value; }
 
-    public get text(): string { return this._text; }
-    public set text(value: string) { this._text = value; }
-
-    constructor(prop: DescriptionProp) {
-        super(prop.id, prop.pos, prop.size, prop.rotate);
-        this._text = prop.text;
+    constructor(prop: DescriptionState) {
+        super(prop);
     }
 
     visit(visitor: Visitor): void {
@@ -28,3 +19,4 @@ class Description extends ItemBase implements Item {
 }
 
 export default Description;
+export type { DescriptionState };

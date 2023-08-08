@@ -4,9 +4,9 @@ import Circle from '../shape/circle';
 import Rotate from '../shape/rotate';
 import Rectangle from '../shape/rectangle';
 import InteractorStrategy from './interactor-strategy';
+import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, PADDING } from './item-interactor';
-import { Point, addPoints, centerPoint, diffPoints, ensureTopLeftSize, middlePoint, pointAngle, rotatePoint } from '../util/point';
-import { fourCornerForRotatedRectangle } from '../util/bounding-box';
+import { Point, addPoints, centerPoint, diffPoints, middlePoint, pointAngle, rotatePoint } from '../util/point';
 
 class SingleSelectInteractorStrategy implements InteractorStrategy {
     drawIndicator(ctx: InteractorContext, items: Item[]): Shape[] {
@@ -46,7 +46,7 @@ class SingleSelectInteractorStrategy implements InteractorStrategy {
         if (topCenter.x - 5 <= pos.x && topCenter.x + 5 >= pos.x && topCenter.y - 5 <= pos.y && topCenter.y + 5 >= pos.y) {
             return InteractingType.Rotate;
         }
-        if (topLeft.x <= pos.x && topLeft.y <= pos.y && bottomRight.x >= pos.x && bottomRight.y >= pos.y) {
+        if (isRectangleCollide(ctx.topLeft, ctx.size, items[0].rotate, pos, { w: 1, h: 1 }, 0)) {
             return InteractingType.Body;
         }
         return InteractingType.None;

@@ -75,6 +75,9 @@ const pointDistance = (p1: Point, p2: Point): number => {
 }
 
 const pointAngle = (p1: Point, p2: Point): number => {
+    if (p1.x === p2.x && p1.y === p2.y) {
+        return 0;
+    }
     const degree = (Math.acos(((p1.x * p2.x) + (p1.y * p2.y)) / (Math.hypot(p1.x, p1.y) * Math.hypot(p2.x, p2.y))) * 180) / Math.PI;
     return (p1.x * p2.y - p1.y * p2.x) >= 0 ? degree : -degree;
 }

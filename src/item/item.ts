@@ -9,7 +9,20 @@ enum ItemEvent {
     Reposition = 'reposition'
 }
 
+interface ItemRecord {
+    type: string;
+    state: any;
+}
+
+interface ItemState {
+    id: string;
+    pos: Point;
+    size: Size;
+    rotate: number;
+}
+
 interface Item extends EventNotifier {
+    get state(): Readonly<any>;
     get id(): string;
     set id(id: string);
     get pos(): Point;
@@ -22,49 +35,46 @@ interface Item extends EventNotifier {
     visit(visitor: Visitor): void;
 }
 
-abstract class ItemBase extends EventNotifierBase implements Item {
-    private _id: string;
-    private _pos: Point;
-    private _size: Size;
-    private _rotate: number;
+abstract class ItemBase<State extends ItemState> extends EventNotifierBase implements Item {
+    protected _state: State;
 
-    public get id(): string { return this._id; }
-    public set id(id: string) { this._id = id; }
+    public get state(): Readonly<any> { return { ...this._state } }
 
-    public get pos(): Point { return this._pos; }
+    public get id(): string { return this._state.id; }
+    public set id(id: string) { this._state.id = id; }
+
+    public get pos(): Point { return this._state.pos; }
     public set pos(pos: Point) {
-        this._pos = pos;
-        this._emit(ItemEvent.Reposition, this._id);
+        this._state.pos = pos;
+        this._emit(ItemEvent.Reposition, this._state.id);
     }
 
-    public get size(): Size { return this._size; }
+    public get size(): Size { return this._state.size; }
     public set size(size: Size) {
-        this._size = size;
-        this._emit(ItemEvent.Resize, this._id);
+        this._state.size = size;
+        this._emit(ItemEvent.Resize, this._state.id);
     }
 
-    public get rotate(): number { return this._rotate; }
+    public get rotate(): number { return this._state.rotate; }
     public set rotate(value: number) {
-        this._rotate = value;
-        this._emit(ItemEvent.Resize, this._id);
+        this._state.rotate = value;
+        this._emit(ItemEvent.Resize, this._state.id);
     }
 
     public get boundingBox(): [Point, Point] {
-        return boundingBoxForRotatedRectangle(this._pos, this._size, this._rotate);
+        return boundingBoxForRotatedRectangle(this._state.pos, this._state.size, this._state.rotate);
     }
 
-    constructor(id: string, pos: Point, size: Size, rotate: number) {
+    constructor(state: State) {
         super();
-        this._id = id;
-        this._pos = pos;
-        this._size = size;
-        this._rotate = rotate;
+        this._state = state;
     }
 
     abstract visit(visitor: Visitor): void;
 }
 
 export default Item;
+export type { ItemRecord, ItemState };
 export {
     ItemBase,
     ItemEvent,

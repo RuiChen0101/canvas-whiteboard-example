@@ -1,25 +1,16 @@
-import { Size } from '../util/size';
-import { Point } from '../util/point';
-import Item, { ItemBase } from './item';
 import Visitor from '../visitor/visitor';
+import Item, { ItemBase, ItemState } from './item';
 
-type BoothProp = {
-    id: string,
-    pos: Point,
-    size: Size,
-    rotate: number,
-    name: string,
+interface BoothState extends ItemState {
+    name: string;
 }
 
-class Booth extends ItemBase implements Item {
-    private _name: string;
+class Booth extends ItemBase<BoothState> {
+    public get name(): string { return this._state.name; }
+    public set name(value: string) { this._state.name = value; }
 
-    public get name(): string { return this._name; }
-    public set name(value: string) { this._name = value; }
-
-    constructor(prop: BoothProp) {
-        super(prop.id, prop.pos, prop.size, prop.rotate);
-        this._name = prop.name;
+    constructor(prop: BoothState) {
+        super(prop);
     }
 
     visit(visitor: Visitor): void {
@@ -28,3 +19,4 @@ class Booth extends ItemBase implements Item {
 }
 
 export default Booth;
+export type { BoothState };

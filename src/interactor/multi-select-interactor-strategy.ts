@@ -97,7 +97,6 @@ class MultiSelectInteractorStrategy implements InteractorStrategy {
         const v2 = diffPoints(center, pos);
 
         const degree = pointAngle(v1, v2);
-
         for (const i of items) {
             i.pos = diffPoints(rotatePoint(centerPoint(i.pos, i.size), center, degree), { x: i.size.w / 2, y: i.size.h / 2 });
             i.rotate = i.rotate + degree;

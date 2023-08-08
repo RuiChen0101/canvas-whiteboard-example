@@ -20,14 +20,14 @@
         .tool {
             width: 100%;
             margin: 4px 0px;
-            padding: 8px;
+            padding: 6px 4px;
             display: flex;
             justify-content: center;
             border-radius: 5px;
 
             &:hover,
             &.active {
-                padding: 6px;
+                padding: 4px 2px;
                 border: 2px solid #0d6efd;
             }
         }

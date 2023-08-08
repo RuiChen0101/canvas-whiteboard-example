@@ -10,7 +10,9 @@ import Toolbox from './overlay/Toolbox';
 import ItemPool from './item/item-pool';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
+import BoothDrawingTool from './tool/booth-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
+import ItemPoolMemento from './item/item-pool-memento';
 
 interface AppState {
   currentTool: string;
@@ -21,6 +23,7 @@ class App extends Component<any, AppState> {
   private _canvasRef = createRef<Canvas>();
   private _itemPool: ItemPool = new ItemPool({ w: 1920, h: 1080 });
   private _currentTool: Tool;
+  private _historyStack: ItemPoolMemento[] = [];
 
   constructor(prop: any) {
     super(prop);
@@ -66,18 +69,34 @@ class App extends Component<any, AppState> {
     this._canvasRef.current!.shapes = drawVisitor.getResult();
   }
 
+  private _saveItemPool = (): void => {
+    this._historyStack.push(this._itemPool.save());
+    if (this._historyStack.length > 30) this._historyStack.shift();
+  }
+
+  private _restoreItemPool = (): void => {
+    const history = this._historyStack.pop()
+    if (history !== undefined) {
+      this._itemPool.restore(history);
+    }
+    this._updateCanvas();
+  }
+
   private _onKeyboardDown = (e: KeyboardEvent): void => {
     if (e.key === 'Delete' || e.key === 'Backspace') {
       this._itemPool.deleteSelectedItem();
       this._updateCanvas();
+    } else if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+      this._restoreItemPool();
     }
   }
 
   private _onDragStart = (pos: Point): void => {
     if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(pos) !== InteractingType.None) {
+      this._saveItemPool();
       this._itemPool.selected.onStart(pos);
     } else {
-      this.setState({ cursorType: "default" });
+      if (!this._currentTool.isStatic) this._saveItemPool();
       this._currentTool.onStart(pos);
     }
     this._updateCanvas();
@@ -88,6 +107,13 @@ class App extends Component<any, AppState> {
       this._itemPool.selected!.onEnd(pos);
     } else {
       this._currentTool.onEnd(pos);
+      if (this.state.currentTool !== 'default') {
+        this._currentTool = new SelectionTool(this._itemPool);
+        this.setState({
+          currentTool: 'select',
+          cursorType: this._currentTool.cursor
+        });
+      }
     }
     this._updateCanvas();
   }
@@ -108,16 +134,16 @@ class App extends Component<any, AppState> {
           this.setState({ cursorType: "move" });
           break;
         case InteractingType.TopLeft:
-          this.setState({ cursorType: "nw-resize" });
+          this.setState({ cursorType: "nwse-resize" });
           break;
         case InteractingType.TopRight:
-          this.setState({ cursorType: "ne-resize" });
+          this.setState({ cursorType: "nesw-resize" });
           break;
         case InteractingType.BottomLeft:
-          this.setState({ cursorType: "sw-resize" });
+          this.setState({ cursorType: "nesw-resize" });
           break;
         case InteractingType.BottomRight:
-          this.setState({ cursorType: "se-resize" });
+          this.setState({ cursorType: "nwse-resize" });
           break;
         case InteractingType.Rotate:
           this.setState({ cursorType: "e-resize" });
@@ -131,10 +157,27 @@ class App extends Component<any, AppState> {
   }
 
   private _onToolChange = (toolName: string): void => {
-    console.log(toolName);
+    this._itemPool.clearSelect();
+    switch (toolName) {
+      case 'select':
+        this._currentTool = new SelectionTool(this._itemPool);
+        this.setState({
+          currentTool: toolName,
+          cursorType: this._currentTool.cursor
+        });
+        break;
+      case 'booth-draw':
+        this._currentTool = new BoothDrawingTool(this._itemPool);
+        this.setState({
+          currentTool: toolName,
+          cursorType: this._currentTool.cursor
+        });
+        break;
+    }
     this.setState({
       currentTool: toolName
-    })
+    });
+    this._updateCanvas();
   }
 
   render(): ReactNode {

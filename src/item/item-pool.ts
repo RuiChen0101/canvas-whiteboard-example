@@ -2,8 +2,11 @@ import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import Item, { ItemEvent } from './item';
-import ItemInteractor from '../interactor/item-interactor';
+import ItemFactory from './item-factory';
 import { Quadtree, Rectangle } from '../quadtree';
+import ItemPoolMemento from './item-pool-memento';
+import ItemInteractor from '../interactor/item-interactor';
+import MementoCaptureVisitor from '../visitor/memento-capture-visitor';
 
 class ItemPool {
     private _selected?: ItemInteractor;
@@ -48,7 +51,13 @@ class ItemPool {
         return result;
     }
 
-    selectItem(pos: Point, size: Size): void {
+    selectItem(id: string): void {
+        if (id in this._items) {
+            this._selected = new ItemInteractor([this._items[id]]);
+        }
+    }
+
+    selectItemByArea(pos: Point, size: Size): void {
         const items = this.searchItem(pos, size);
         if (items.length === 0) {
             this.clearSelect();
@@ -60,6 +69,7 @@ class ItemPool {
     deleteSelectedItem(): void {
         if (this._selected === undefined) return;
         for (const i of this._selected.items) {
+            this._items[i.id].clear();
             delete this._items[i.id];
             this._quadtree.remove(i.id);
         }
@@ -68,6 +78,23 @@ class ItemPool {
 
     clearSelect(): void {
         this._selected = undefined;
+    }
+
+    save(): ItemPoolMemento {
+        const visitor = new MementoCaptureVisitor();
+        this.visit(visitor);
+        return new ItemPoolMemento(visitor.getResult());
+    }
+
+    restore(memento: ItemPoolMemento): void {
+        this.clearSelect();
+        this._items = {};
+        this._quadtree.clear();
+        const factory = new ItemFactory();
+        for (const r of memento.records) {
+            const item = factory.build(r)
+            this.addItem(item);
+        }
     }
 
     visit(visitor: Visitor): void {

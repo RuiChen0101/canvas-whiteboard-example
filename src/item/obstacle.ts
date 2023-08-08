@@ -1,19 +1,12 @@
-import { Size } from '../util/size';
-import { Point } from '../util/point';
-import Item, { ItemBase } from './item';
 import Visitor from '../visitor/visitor';
+import Item, { ItemBase, ItemState } from './item';
 
-type ObstacleProp = {
-    id: string,
-    pos: Point,
-    size: Size,
-    rotate: number
-}
+interface ObstacleState extends ItemState { }
 
-class Obstacle extends ItemBase implements Item {
+class Obstacle extends ItemBase<ObstacleState> {
 
-    constructor(prop: ObstacleProp) {
-        super(prop.id, prop.pos, prop.size, prop.rotate);
+    constructor(prop: ObstacleState) {
+        super(prop);
     }
 
     visit(visitor: Visitor): void {
@@ -22,3 +15,4 @@ class Obstacle extends ItemBase implements Item {
 }
 
 export default Obstacle;
+export type { ObstacleState };
