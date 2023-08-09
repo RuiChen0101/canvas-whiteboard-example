@@ -22,7 +22,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
         const shape = [
             new Text({ text: description.text, pos: description.pos })
         ]
-        this._shapes.push(...this._decoWithRotate(shape, description.pos, description.rotate));
+        this._shapes.push(...this._decoWithRotate(shape, centerPoint(description.pos, description.size), description.rotate));
     }
 
     _decoWithRotate(shapes: Shape[], anchor: Point, rotate: number): Shape[] {

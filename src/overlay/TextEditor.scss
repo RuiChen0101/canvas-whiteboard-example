@@ -1,0 +1,19 @@
+.text-editor-root {
+    position: fixed;
+    z-index: 5;
+
+    &.disable {
+        display: none;
+    }
+
+    .text-editor {
+        padding: 4px;
+        text-align: center;
+
+        &:focus,
+        &:focus-visible {
+            border: 2px solid #0d6efd;
+            outline: none;
+        }
+    }
+}

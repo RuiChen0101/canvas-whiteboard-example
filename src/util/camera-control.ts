@@ -7,6 +7,12 @@ type CameraControlProp = {
     cameraBound: Size;
 }
 
+interface CameraState {
+    viewport: Point;
+    viewSize: Size;
+    scale: number;
+}
+
 class CameraControl {
     private readonly ZOOM_SENSITIVITY: number = 500;
     private readonly OUTBOUND_ZOOM_FRICTION: number = 90; // higher = more friction
@@ -28,6 +34,7 @@ class CameraControl {
     private _scaleTension: number = 0;
 
     private _controlled: boolean = false;
+    private _disabled: boolean = false;
 
     public set canvasSize(size: Size) {
         this._canvasSize = size;
@@ -35,9 +42,17 @@ class CameraControl {
         this._updateScaleTension();
     }
 
-    public get viewport(): Point { return this._viewport; }
-    public get viewSize(): Size { return this._viewSize; }
-    public get scale(): number { return this._scale; }
+    public set disabled(b: boolean) {
+        this._disabled = b;
+    }
+
+    public get state(): CameraState {
+        return {
+            viewport: this._viewport,
+            viewSize: this._viewSize,
+            scale: this._scale
+        }
+    }
 
     public get controlled(): boolean { return this._controlled; }
 
@@ -60,6 +75,7 @@ class CameraControl {
     }
 
     public moveCamera(delta: Point): void {
+        if (this._disabled) return;
         const viewportDiff = addPoints(downScalePoint(this._boundTensionVector, this.OUTBOUND_MOVE_FRICTION), downScalePoint(delta, this._scale));
         if (isSameDirection(viewportDiff, delta)) {
             this._viewport = diffPoints(this._viewport, viewportDiff);
@@ -71,6 +87,7 @@ class CameraControl {
     }
 
     public zoom(zoomCenter: Point, delta: number): void {
+        if (this._disabled) return;
         let zoom = (1 - delta / this.ZOOM_SENSITIVITY);
         if (this._scaleTension > 0.01 && delta > 0) {
             zoom = (1 - Math.max(0, delta - (this._scaleTension * this.OUTBOUND_ZOOM_FRICTION)) / this.ZOOM_SENSITIVITY);
@@ -150,3 +167,4 @@ class CameraControl {
 }
 
 export default CameraControl;
+export type { CameraState };

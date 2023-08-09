@@ -5,10 +5,6 @@ interface ObstacleState extends ItemState { }
 
 class Obstacle extends ItemBase<ObstacleState> {
 
-    constructor(prop: ObstacleState) {
-        super(prop);
-    }
-
     visit(visitor: Visitor): void {
         visitor.visitObstacle(this);
     }

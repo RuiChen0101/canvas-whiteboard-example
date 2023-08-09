@@ -8,11 +8,14 @@ import Booth from './item/booth';
 import { Point } from './util/point';
 import Toolbox from './overlay/Toolbox';
 import ItemPool from './item/item-pool';
+import Description from './item/description';
+import TextEditor from './overlay/TextEditor';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
+import ItemPoolMemento from './item/item-pool-memento';
 import BoothDrawingTool from './tool/booth-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
-import ItemPoolMemento from './item/item-pool-memento';
+import Random from './util/random';
 
 interface AppState {
   currentTool: string;
@@ -21,9 +24,12 @@ interface AppState {
 
 class App extends Component<any, AppState> {
   private _canvasRef = createRef<Canvas>();
+  private _textEditorRef = createRef<TextEditor>();
   private _itemPool: ItemPool = new ItemPool({ w: 1920, h: 1080 });
   private _currentTool: Tool;
   private _historyStack: ItemPoolMemento[] = [];
+
+  private _random: Random = new Random();
 
   constructor(prop: any) {
     super(prop);
@@ -32,21 +38,7 @@ class App extends Component<any, AppState> {
       cursorType: 'default',
     }
     this._currentTool = new SelectionTool(this._itemPool);
-    this._itemPool.addItem(new Booth({ id: '1', name: 'booth1', pos: { x: 100, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 400, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '3', name: 'booth3', pos: { x: 700, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '4', name: 'booth4', pos: { x: 1000, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '5', name: 'booth5', pos: { x: 1300, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '6', name: 'booth6', pos: { x: 100, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '7', name: 'booth7', pos: { x: 400, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '8', name: 'booth8', pos: { x: 700, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '9', name: 'booth9', pos: { x: 1000, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '10', name: 'booth10', pos: { x: 1300, y: 300 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '11', name: 'booth11', pos: { x: 100, y: 500 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '12', name: 'booth12', pos: { x: 400, y: 500 }, size: { w: 200, h: 100 }, rotate: -45 }));
-    this._itemPool.addItem(new Booth({ id: '13', name: 'booth13', pos: { x: 700, y: 500 }, size: { w: 200, h: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '14', name: 'booth14', pos: { x: 1000, y: 500 }, size: { w: 200, h: 100 }, rotate: 45 }));
-    this._itemPool.addItem(new Booth({ id: '15', name: 'booth15', pos: { x: 1300, y: 500 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Description({ id: '1', text: 'booth1', pos: { x: 100, y: 100 }, rotate: 0 }));
   }
 
   componentDidMount(): void {
@@ -91,22 +83,31 @@ class App extends Component<any, AppState> {
     }
   }
 
-  private _onDragStart = (pos: Point): void => {
-    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(pos) !== InteractingType.None) {
+  private _onDragStart = (windowPos: Point, canvasPos: Point): void => {
+    if (this._textEditorRef.current?.isEnable) {
+      this._canvasRef.current!.cameraDisable = false;
+      const editor = this._textEditorRef.current;
+      if (editor.text !== '') {
+        this._saveItemPool();
+        this._itemPool.addItem(new Description({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(editor.pos), text: editor.text, rotate: 0 }));
+      }
+      this._textEditorRef.current.disable();
+    }
+    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(canvasPos) !== InteractingType.None) {
       this._saveItemPool();
-      this._itemPool.selected.onStart(pos);
+      this._itemPool.selected.onStart(canvasPos);
     } else {
       if (!this._currentTool.isStatic) this._saveItemPool();
-      this._currentTool.onStart(pos);
+      this._currentTool.onStart(canvasPos);
     }
     this._updateCanvas();
   }
 
-  private _onDragEnd = (pos: Point): void => {
+  private _onDragEnd = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
-      this._itemPool.selected!.onEnd(pos);
+      this._itemPool.selected!.onEnd(canvasPos);
     } else {
-      this._currentTool.onEnd(pos);
+      this._currentTool.onEnd(canvasPos);
       if (this.state.currentTool !== 'default') {
         this._currentTool = new SelectionTool(this._itemPool);
         this.setState({
@@ -118,18 +119,18 @@ class App extends Component<any, AppState> {
     this._updateCanvas();
   }
 
-  private _onDragMove = (pos: Point): void => {
+  private _onDragMove = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
-      this._itemPool.selected!.onMove(pos);
+      this._itemPool.selected!.onMove(canvasPos);
     } else {
-      this._currentTool.onMove(pos);
+      this._currentTool.onMove(canvasPos);
     }
     this._updateCanvas();
   }
 
-  private _onMouseMove = (pos: Point): void => {
+  private _onMouseMove = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected !== undefined) {
-      switch (this._itemPool.selected.checkInteract(pos)) {
+      switch (this._itemPool.selected.checkInteract(canvasPos)) {
         case InteractingType.Body:
           this.setState({ cursorType: "move" });
           break;
@@ -154,6 +155,11 @@ class App extends Component<any, AppState> {
       }
       return;
     }
+  }
+
+  private _onDoubleClick = (windowPos: Point, canvasPos: Point): void => {
+    this._canvasRef.current!.cameraDisable = true;
+    this._textEditorRef.current!.enable(1, windowPos, 0, '');
   }
 
   private _onToolChange = (toolName: string): void => {
@@ -186,6 +192,7 @@ class App extends Component<any, AppState> {
         id="app"
         style={{ cursor: this.state.cursorType }}>
         <Toolbox currentTool={this.state.currentTool} onToolChange={this._onToolChange} />
+        <TextEditor ref={this._textEditorRef} />
         <Canvas
           ref={this._canvasRef}
           cameraBound={{ w: 1920, h: 1080 }}
@@ -193,6 +200,7 @@ class App extends Component<any, AppState> {
           onDragMove={this._onDragMove}
           onDragEnd={this._onDragEnd}
           onMouseMove={this._onMouseMove}
+          onDoubleClick={this._onDoubleClick}
         />
       </div>
     )

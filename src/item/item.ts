@@ -35,6 +35,10 @@ interface Item extends EventNotifier {
     visit(visitor: Visitor): void;
 }
 
+interface TextEditable {
+
+}
+
 abstract class ItemBase<State extends ItemState> extends EventNotifierBase implements Item {
     protected _state: State;
 
@@ -74,7 +78,7 @@ abstract class ItemBase<State extends ItemState> extends EventNotifierBase imple
 }
 
 export default Item;
-export type { ItemRecord, ItemState };
+export type { TextEditable, ItemRecord, ItemState };
 export {
     ItemBase,
     ItemEvent,
