@@ -59,7 +59,14 @@ class TextEditor extends Component<any, TextEditorState>{
 
     render(): ReactNode {
         return (
-            <div className={`text-editor-root${!this.state.enable ? ' disable' : ''}`} style={{ top: this.state.pos.y, left: this.state.pos.x }}>
+            <div
+                className={`text-editor-root${!this.state.enable ? ' disable' : ''}`}
+                style={{
+                    top: this.state.pos.y,
+                    left: this.state.pos.x,
+                    transform: `rotate(${this.state.rotate}deg) scale(${this.state.scale})`
+                }}
+            >
                 <div
                     ref={this._inputRef}
                     className="text-editor"

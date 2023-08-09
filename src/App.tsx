@@ -38,7 +38,7 @@ class App extends Component<any, AppState> {
       cursorType: 'default',
     }
     this._currentTool = new SelectionTool(this._itemPool);
-    this._itemPool.addItem(new Description({ id: '1', text: 'booth1', pos: { x: 100, y: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Description({ id: '1', text: 'booth1\ncsacsacas', pos: { x: 100, y: 100 }, rotate: 0 }));
   }
 
   componentDidMount(): void {
@@ -159,7 +159,7 @@ class App extends Component<any, AppState> {
 
   private _onDoubleClick = (windowPos: Point, canvasPos: Point): void => {
     this._canvasRef.current!.cameraDisable = true;
-    this._textEditorRef.current!.enable(1, windowPos, 0, '');
+    this._textEditorRef.current!.enable(this._canvasRef.current!.cameraState.scale, windowPos, 0, '');
   }
 
   private _onToolChange = (toolName: string): void => {
