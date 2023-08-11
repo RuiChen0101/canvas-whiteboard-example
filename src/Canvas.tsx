@@ -76,6 +76,10 @@ class Canvas extends Component<CanvasProps, CanvasState> {
         return this._cameraControl!.toLocalPoint(p);
     }
 
+    public toScreenPoint = (p: Point): Point => {
+        return this._cameraControl!.toClientPoint(p);
+    }
+
     private _onWindowsResize = (): void => {
         this._setCanvasSize();
     }

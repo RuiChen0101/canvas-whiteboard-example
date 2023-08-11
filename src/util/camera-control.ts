@@ -1,5 +1,5 @@
 import { Size, ZERO_SIZE, scaleSize } from './size';
-import { Point, addPoints, downScalePoint, diffPoints, ORIGIN, isParallel, isSameDirection } from './point';
+import { Point, addPoints, downScalePoint, diffPoints, ORIGIN, isParallel, isSameDirection, upScalePoint } from './point';
 
 type CameraControlProp = {
     context: CanvasRenderingContext2D;
@@ -72,6 +72,10 @@ class CameraControl {
 
     public toLocalPoint(p: Point): Point {
         return addPoints(downScalePoint(p, this._scale), this._viewport);
+    }
+
+    public toClientPoint(p: Point): Point {
+        return upScalePoint(diffPoints(p, this._viewport), this._scale);
     }
 
     public moveCamera(delta: Point): void {
@@ -161,8 +165,8 @@ class CameraControl {
     }
 
     private _updateScaleTension(): void {
-        const scale = Math.max(this._canvas.width / this._cameraBound.w, this._canvas.height / this._cameraBound.h);
-        this._scaleTension = this._scale >= scale ? 0 : scale - this._scale;
+        const maxScale = Math.max(this._canvas.width / this._cameraBound.w, this._canvas.height / this._cameraBound.h);
+        this._scaleTension = this._scale >= maxScale ? 0 : maxScale - this._scale;
     }
 }
 

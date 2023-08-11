@@ -4,18 +4,18 @@ import { Component, ReactNode, createRef } from 'react';
 import './App.css';
 
 import Tool from './tool/tool';
-import Booth from './item/booth';
+import Random from './util/random';
 import { Point } from './util/point';
 import Toolbox from './overlay/Toolbox';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
-import TextEditor from './overlay/TextEditor';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import BoothDrawingTool from './tool/booth-drawing-tool';
+import { hideTextEditor, showTextEditor } from './text-editor/TextEditor';
 import { InteractingType } from './interactor/item-interactor';
-import Random from './util/random';
+import { Size, ZERO_SIZE } from './util/size';
 
 interface AppState {
   currentTool: string;
@@ -24,10 +24,12 @@ interface AppState {
 
 class App extends Component<any, AppState> {
   private _canvasRef = createRef<Canvas>();
-  private _textEditorRef = createRef<TextEditor>();
   private _itemPool: ItemPool = new ItemPool({ w: 1920, h: 1080 });
   private _currentTool: Tool;
   private _historyStack: ItemPoolMemento[] = [];
+
+  private _isTextEditing: boolean = false;
+  private _textBuffer: string = '';
 
   private _random: Random = new Random();
 
@@ -38,7 +40,7 @@ class App extends Component<any, AppState> {
       cursorType: 'default',
     }
     this._currentTool = new SelectionTool(this._itemPool);
-    this._itemPool.addItem(new Description({ id: '1', text: 'booth1\ncsacsacas', pos: { x: 100, y: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Description({ id: '1', text: 'booth1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
   }
 
   componentDidMount(): void {
@@ -74,8 +76,20 @@ class App extends Component<any, AppState> {
     this._updateCanvas();
   }
 
+  private _showTextEditor = (type: string, pos: Point, size: Size, rotate: number, text: string): void => {
+    if (type === 'none') return;
+    this._canvasRef.current!.cameraDisable = true;
+    showTextEditor({ text: text, pos: pos, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, onTextChange: this._onTextChange });
+    this._isTextEditing = true;
+  }
+
   private _onKeyboardDown = (e: KeyboardEvent): void => {
+    if (this._itemPool.selected !== undefined && this._itemPool.selected.isInteracting) {
+      console.log('prevent');
+      return;
+    }
     if (e.key === 'Delete' || e.key === 'Backspace') {
+      this._saveItemPool();
       this._itemPool.deleteSelectedItem();
       this._updateCanvas();
     } else if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
@@ -84,18 +98,24 @@ class App extends Component<any, AppState> {
   }
 
   private _onDragStart = (windowPos: Point, canvasPos: Point): void => {
-    if (this._textEditorRef.current?.isEnable) {
+    if (this._isTextEditing) {
       this._canvasRef.current!.cameraDisable = false;
-      const editor = this._textEditorRef.current;
-      if (editor.text !== '') {
+      this._isTextEditing = false;
+      if (this._textBuffer !== '') {
         this._saveItemPool();
-        this._itemPool.addItem(new Description({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(editor.pos), text: editor.text, rotate: 0 }));
+        // this._itemPool.addItem(new Description({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(editor.pos), text: editor.text, rotate: 0 }));
       }
-      this._textEditorRef.current.disable();
+      hideTextEditor();
+      // const editor = this._textEditorRef.current;
+      // if (editor.text !== '') {
+      //   this._saveItemPool();
+      //   this._itemPool.addItem(new Description({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(editor.pos), text: editor.text, rotate: 0 }));
+      // }
+      // this._textEditorRef.current.disable();
     }
-    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(canvasPos) !== InteractingType.None) {
+    if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(canvasPos, false) !== InteractingType.None) {
       this._saveItemPool();
-      this._itemPool.selected.onStart(canvasPos);
+      this._itemPool.selected.onDragStart(canvasPos);
     } else {
       if (!this._currentTool.isStatic) this._saveItemPool();
       this._currentTool.onStart(canvasPos);
@@ -105,15 +125,11 @@ class App extends Component<any, AppState> {
 
   private _onDragEnd = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
-      this._itemPool.selected!.onEnd(canvasPos);
+      this._itemPool.selected!.onDragEnd(canvasPos);
     } else {
       this._currentTool.onEnd(canvasPos);
-      if (this.state.currentTool !== 'default') {
-        this._currentTool = new SelectionTool(this._itemPool);
-        this.setState({
-          currentTool: 'select',
-          cursorType: this._currentTool.cursor
-        });
+      if (this.state.currentTool !== 'select') {
+        this._onToolChange('select');
       }
     }
     this._updateCanvas();
@@ -121,7 +137,7 @@ class App extends Component<any, AppState> {
 
   private _onDragMove = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
-      this._itemPool.selected!.onMove(canvasPos);
+      this._itemPool.selected!.onDragMove(canvasPos);
     } else {
       this._currentTool.onMove(canvasPos);
     }
@@ -130,7 +146,7 @@ class App extends Component<any, AppState> {
 
   private _onMouseMove = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected !== undefined) {
-      switch (this._itemPool.selected.checkInteract(canvasPos)) {
+      switch (this._itemPool.selected.checkInteract(canvasPos, false)) {
         case InteractingType.Body:
           this.setState({ cursorType: "move" });
           break;
@@ -157,9 +173,30 @@ class App extends Component<any, AppState> {
     }
   }
 
+  private _onTextChange = (text: string): void => {
+    this._textBuffer = text;
+    if (this._itemPool.selected !== undefined && this._itemPool.selected.isInteracting) {
+      this._itemPool.selected.onTextEdit(text);
+    }
+    this._updateCanvas();
+  }
+
   private _onDoubleClick = (windowPos: Point, canvasPos: Point): void => {
-    this._canvasRef.current!.cameraDisable = true;
-    this._textEditorRef.current!.enable(this._canvasRef.current!.cameraState.scale, windowPos, 0, '');
+    if (this._itemPool.selected !== undefined) {
+      const interactType = this._itemPool.selected.checkInteract(canvasPos, true);
+      if (interactType === InteractingType.Text) {
+        const [type, pos, size, rotate, text] = this._itemPool.selected.onTextEditStart();
+        this._showTextEditor(type, this._canvasRef.current!.toScreenPoint(pos), size, rotate, text);
+        this._updateCanvas();
+        return;
+      } else if (interactType !== InteractingType.None) {
+        return;
+      }
+    }
+    this._itemPool.clearSelect();
+    this._textBuffer = '';
+    this._showTextEditor('free', windowPos, ZERO_SIZE, 0, '');
+    this._updateCanvas();
   }
 
   private _onToolChange = (toolName: string): void => {
@@ -192,7 +229,6 @@ class App extends Component<any, AppState> {
         id="app"
         style={{ cursor: this.state.cursorType }}>
         <Toolbox currentTool={this.state.currentTool} onToolChange={this._onToolChange} />
-        <TextEditor ref={this._textEditorRef} />
         <Canvas
           ref={this._canvasRef}
           cameraBound={{ w: 1920, h: 1080 }}

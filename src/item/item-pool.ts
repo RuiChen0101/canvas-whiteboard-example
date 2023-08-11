@@ -5,8 +5,10 @@ import Item, { ItemEvent } from './item';
 import ItemFactory from './item-factory';
 import { Quadtree, Rectangle } from '../quadtree';
 import ItemPoolMemento from './item-pool-memento';
-import ItemInteractor from '../interactor/item-interactor';
+import { ItemInteractor } from '../interactor/item-interactor';
+import MultiItemInteractor from '../interactor/multi-item-interactor';
 import MementoCaptureVisitor from '../visitor/memento-capture-visitor';
+import SingleItemInteractor from '../interactor/single-item-interactor';
 
 class ItemPool {
     private _selected?: ItemInteractor;
@@ -53,7 +55,7 @@ class ItemPool {
 
     selectItem(id: string): void {
         if (id in this._items) {
-            this._selected = new ItemInteractor([this._items[id]]);
+            this._selected = new SingleItemInteractor(this._items[id]);
         }
     }
 
@@ -61,8 +63,10 @@ class ItemPool {
         const items = this.searchItem(pos, size);
         if (items.length === 0) {
             this.clearSelect();
+        } else if (items.length === 1) {
+            this._selected = new SingleItemInteractor(items[0]);
         } else {
-            this._selected = new ItemInteractor(items);
+            this._selected = new MultiItemInteractor(items);
         }
     }
 

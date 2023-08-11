@@ -35,8 +35,12 @@ interface Item extends EventNotifier {
     visit(visitor: Visitor): void;
 }
 
-interface TextEditable {
-
+interface TextEditableItem extends Item {
+    get textEditable(): boolean;
+    get isEditing(): boolean;
+    set isEditing(b: boolean);
+    set text(text: string);
+    get text(): string;
 }
 
 abstract class ItemBase<State extends ItemState> extends EventNotifierBase implements Item {
@@ -78,7 +82,7 @@ abstract class ItemBase<State extends ItemState> extends EventNotifierBase imple
 }
 
 export default Item;
-export type { TextEditable, ItemRecord, ItemState };
+export type { TextEditableItem, ItemRecord, ItemState };
 export {
     ItemBase,
     ItemEvent,

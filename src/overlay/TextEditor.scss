@@ -1,6 +1,7 @@
 .text-editor-root {
     position: fixed;
     z-index: 5;
+    max-width: 100px;
 
     &.disable {
         display: none;
@@ -10,7 +11,9 @@
         position: absolute;
         padding: 4px;
         font-family: serif;
-        font-size: 12px;
+        font-size: 16px;
+        line-height: 1.2;
+        overflow-wrap: break-word;
 
         &:focus,
         &:focus-visible {
