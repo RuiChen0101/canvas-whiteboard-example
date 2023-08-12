@@ -18,11 +18,7 @@ interface DescriptionState extends ItemState {
 class Description extends ItemBase<DescriptionState> implements TextEditableItem {
     public get textEditable(): boolean { return true; }
     public get text(): string { return this._state.text; }
-    public set text(value: string) {
-        this._state.text = value;
-        console.log(value);
-        this.size = { w: measureTextWidth(value, 'serif', 16), h: measureTextHeight(value, 16, 1.2) }
-    }
+    public set text(value: string) { this._state.text = value; }
 
     get isEditing(): boolean {
         return this._state.isEditing;

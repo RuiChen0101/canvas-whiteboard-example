@@ -1,0 +1,41 @@
+.bounded-text-editor-root {
+    position: fixed;
+    z-index: 5;
+    transform-origin: center;
+
+    .text-editor {
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+        position: absolute;
+        font-family: serif;
+        font-size: 16px;
+        line-height: 1.2;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        &.bordered {
+
+            &:focus,
+            &:focus-visible {
+                border: 2px solid #0d6efd;
+            }
+        }
+
+        &:focus,
+        &:focus-visible {
+            outline: none;
+        }
+
+        div {
+            width: 100%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            margin: 0px;
+            padding: 0px;
+        }
+    }
+}

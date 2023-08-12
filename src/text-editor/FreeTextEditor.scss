@@ -1,0 +1,33 @@
+.free-text-editor-root {
+    position: fixed;
+    z-index: 5;
+
+    .text-editor {
+        display: inline-block;
+        position: absolute;
+        padding: 4px;
+        font-family: serif;
+        font-size: 16px;
+        line-height: 121%;
+
+        &.bordered {
+
+            &:focus,
+            &:focus-visible {
+                border: 2px solid #0d6efd;
+            }
+        }
+
+        &:focus,
+        &:focus-visible {
+            outline: none;
+        }
+
+        div {
+            white-space: nowrap;
+            overflow: hidden;
+            margin: 0px;
+            padding: 0px;
+        }
+    }
+}

@@ -39,7 +39,7 @@ interface TextEditableItem extends Item {
     get textEditable(): boolean;
     get isEditing(): boolean;
     set isEditing(b: boolean);
-    set text(text: string);
+    set text(value: string);
     get text(): string;
 }
 

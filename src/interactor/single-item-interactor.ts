@@ -8,9 +8,10 @@ import MoveStrategy, { FreeMoveStrategy } from './move-strategy';
 import ResizeStrategy, { FreeResizeStrategy } from './resize-strategy';
 import RotateStrategy, { FreeRotateStrategy } from './rotate-strategy';
 import { ORIGIN, Point, centerPoint, rotatePoint } from '../util/point';
-import TextEditStrategy, { FreeTextEditStrategy } from './text-edit-strategy';
+import TextEditStrategy, { BoundedTextEditStrategy, FreeTextEditStrategy } from './text-edit-strategy';
 import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, ItemInteractor, PADDING } from './item-interactor';
+import Booth from '../item/booth';
 
 class SingleItemInteractor implements ItemInteractor {
     private _item: Item;
@@ -78,6 +79,11 @@ class SingleItemInteractor implements ItemInteractor {
 
     onTextEditStart(): [string, Point, Size, number, string] {
         if (!('textEditable' in this._item)) return ['none', ORIGIN, ZERO_SIZE, 0, ''];
+        if (this._item instanceof Booth) {
+            this._textEditStrategy = new BoundedTextEditStrategy();
+        } else {
+            this._textEditStrategy = new FreeTextEditStrategy();
+        }
         this._interact = InteractingType.Text;
         return this._textEditStrategy.startEdit(this._context, this._item as TextEditableItem);
     }

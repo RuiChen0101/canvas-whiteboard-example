@@ -12,7 +12,7 @@ const measureTextWidth = (text: string, fontFamily: string, fontSize: number): n
     const lines = text.split(/\n/g);
     for (const l of lines) {
         const metric = measureContext!.measureText(l);
-        maxWidth = Math.max(maxWidth, metric.actualBoundingBoxRight + metric.actualBoundingBoxLeft);
+        maxWidth = Math.max(maxWidth, metric.width);
     }
     return maxWidth;
 }

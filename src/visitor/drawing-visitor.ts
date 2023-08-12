@@ -15,7 +15,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
             new Rectangle({ pos: booth.pos, size: booth.size }),
         ];
         if (!booth.isEditing) {
-            shapes.push(new Text({ text: booth.name, pos: centerPoint(booth.pos, booth.size) }));
+            shapes.push(new Text({ text: booth.name, pos: centerPoint(booth.pos, booth.size), vAlign: 'middle', hAlign: 'center' }));
         }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(booth.pos, booth.size), booth.rotate));
     }
