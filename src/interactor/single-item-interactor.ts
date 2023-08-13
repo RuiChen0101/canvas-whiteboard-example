@@ -88,9 +88,10 @@ class SingleItemInteractor implements ItemInteractor {
         return this._textEditStrategy.startEdit(this._context, this._item as TextEditableItem);
     }
 
-    onTextEdit(text: string): void {
-        this._textEditStrategy.onEdit(this._context, this._item as TextEditableItem, text);
+    onTextEdit(text: string): [Point, Size, number] {
+        const [pos, size, rotate] = this._textEditStrategy.onEdit(this._context, this._item as TextEditableItem, text);
         this._inferPosAndSize();
+        return [pos, size, rotate];
     }
 
     onTextEditEnd(text: string): void {

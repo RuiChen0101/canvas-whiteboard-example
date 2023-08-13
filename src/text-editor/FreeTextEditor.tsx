@@ -1,12 +1,15 @@
+import { RefObject } from 'react';
 import { Size } from '../util/size';
 import { Point } from '../util/point';
 import { Component, createRef, ClipboardEvent, ReactNode, FormEvent } from 'react';
 
 import './FreeTextEditor.scss';
 
+import { EventNotifierBase } from '../util/event';
+import { TextEditController, TextEditor } from './TextEditor';
+
 interface FreeTextEditorProps {
     pos: Point;
-    size: Size;
     scale: number;
     rotate: number;
     text: string;
@@ -14,8 +17,46 @@ interface FreeTextEditorProps {
     onTextChange: (text: string) => void;
 }
 
-class FreeTextEditor extends Component<FreeTextEditorProps> {
+interface FreeTextEditorState {
+    pos: Point;
+    rotate: number;
+}
+
+class FreeTextEditController extends EventNotifierBase implements TextEditController {
+    private _editorRef: RefObject<FreeTextEditor>;
+
+    constructor(ref: RefObject<FreeTextEditor>) {
+        super()
+        this._editorRef = ref;
+    }
+
+    set pos(p: Point) { this._editorRef.current!.pos = p; }
+
+    set size(s: Size) { }
+
+    set rotate(r: number) { this._editorRef.current!.rotate = r; }
+
+    onTextChange = (text: string): void => {
+        this._emit('text_change', text);
+    }
+}
+
+class FreeTextEditor extends Component<FreeTextEditorProps, FreeTextEditorState> implements TextEditor {
     private _inputRef = createRef<HTMLDivElement>();
+
+    set pos(p: Point) { this.setState({ pos: p }); }
+
+    set size(s: Size) { }
+
+    set rotate(r: number) { this.setState({ rotate: r }) }
+
+    constructor(props: FreeTextEditorProps) {
+        super(props);
+        this.state = {
+            pos: { ...props.pos },
+            rotate: props.rotate
+        }
+    }
 
     componentDidMount(): void {
         this._inputRef.current!.innerHTML = this._convertTextToHtml(this.props.text);
@@ -73,17 +114,17 @@ class FreeTextEditor extends Component<FreeTextEditorProps> {
             <div
                 className='free-text-editor-root'
                 style={{
-                    top: this.props.pos.y - (8 * this.props.scale),
-                    left: this.props.pos.x - (6 * this.props.scale),
+                    top: this.state.pos.y - (8 * this.props.scale),
+                    left: this.state.pos.x - (6 * this.props.scale),
                     transform: `scale(${this.props.scale})`
                 }}
             >
 
                 <div
                     ref={this._inputRef}
-                    className={`text-editor${!!!this.props.bordered ? ' bordered' : ''}`}
+                    className={`text-editor${!!this.props.bordered ? ' bordered' : ''}`}
                     style={{
-                        transform: `rotate(${this.props.rotate}deg)`
+                        transform: `rotate(${this.state.rotate}deg)`
                     }}
                     contentEditable="true"
                     spellCheck="false"
@@ -98,3 +139,6 @@ class FreeTextEditor extends Component<FreeTextEditorProps> {
 }
 
 export default FreeTextEditor;
+export {
+    FreeTextEditController
+}

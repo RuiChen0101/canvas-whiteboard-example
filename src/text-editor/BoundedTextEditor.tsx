@@ -1,8 +1,10 @@
-import { Component, FormEvent, ClipboardEvent, ReactNode, createRef } from 'react';
-
-import './BoundedTextEditor.scss';
 import { Size } from '../util/size';
 import { Point } from '../util/point';
+import { EventNotifierBase } from '../util/event';
+import { TextEditController, TextEditor } from './TextEditor';
+import { Component, FormEvent, ClipboardEvent, ReactNode, createRef, RefObject } from 'react';
+
+import './BoundedTextEditor.scss';
 
 interface BoundedTextEditorProps {
     pos: Point;
@@ -10,13 +12,52 @@ interface BoundedTextEditorProps {
     rotate: number;
     text: string;
     size: Size;
-    bordered?: boolean;
+    bordered: boolean;
     onTextChange: (text: string) => void;
 }
 
+interface BoundedTextEditorState {
+    pos: Point;
+    size: Size;
+    rotate: number;
+}
 
-class BoundedTextEditor extends Component<BoundedTextEditorProps> {
+class BoundedTextEditController extends EventNotifierBase implements TextEditController {
+    private _editorRef: RefObject<BoundedTextEditor>;
+
+    constructor(ref: RefObject<BoundedTextEditor>) {
+        super()
+        this._editorRef = ref;
+    }
+
+    set pos(p: Point) { this._editorRef.current!.pos = p; }
+
+    set size(s: Size) { console.log(s); this._editorRef.current!.size = s; }
+
+    set rotate(r: number) { this._editorRef.current!.rotate = r; }
+
+    onTextChange = (text: string): void => {
+        this._emit('text_change', text);
+    }
+}
+
+class BoundedTextEditor extends Component<BoundedTextEditorProps, BoundedTextEditorState> implements TextEditor {
     private _inputRef = createRef<HTMLDivElement>();
+
+    set pos(p: Point) { this.setState({ pos: p }); }
+
+    set size(s: Size) { this.setState({ size: s }); }
+
+    set rotate(r: number) { this.setState({ rotate: r }); }
+
+    constructor(props: BoundedTextEditorProps) {
+        super(props);
+        this.state = {
+            pos: { ...props.pos },
+            size: { ...props.size },
+            rotate: props.rotate
+        }
+    }
 
     componentDidMount(): void {
         this._inputRef.current!.innerHTML = this._convertTextToHtml(this.props.text);
@@ -65,18 +106,18 @@ class BoundedTextEditor extends Component<BoundedTextEditorProps> {
             <div
                 className='bounded-text-editor-root'
                 style={{
-                    top: this.props.pos.y,
-                    left: this.props.pos.x,
+                    top: this.state.pos.y,
+                    left: this.state.pos.x,
                     transform: `scale(${this.props.scale})`
                 }}
             >
                 <div
                     ref={this._inputRef}
-                    className={`text-editor${this.props.bordered ? ' bordered' : ''}`}
+                    className={`text-editor${!!this.props.bordered ? ' bordered' : ''}`}
                     style={{
-                        width: this.props.size.w,
-                        height: this.props.size.h,
-                        transform: `rotate(${this.props.rotate}deg)`
+                        width: this.state.size.w,
+                        height: this.state.size.h,
+                        transform: `rotate(${this.state.rotate}deg)`
                     }}
                     contentEditable="true"
                     spellCheck="false"
@@ -91,3 +132,6 @@ class BoundedTextEditor extends Component<BoundedTextEditorProps> {
 }
 
 export default BoundedTextEditor;
+export {
+    BoundedTextEditController
+};

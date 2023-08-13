@@ -15,7 +15,7 @@ import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import BoothDrawingTool from './tool/booth-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
-import { hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
+import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
 import Booth from './item/booth';
 
 interface AppState {
@@ -29,6 +29,7 @@ class App extends Component<any, AppState> {
   private _currentTool: Tool;
   private _historyStack: ItemPoolMemento[] = [];
 
+  private _textEditController?: TextEditController = undefined;
   private _isTextEditing: boolean = false;
   private _textBuffer: string = '';
   private _editorPos: Point = ORIGIN;
@@ -84,10 +85,11 @@ class App extends Component<any, AppState> {
     this._canvasRef.current!.cameraDisable = true;
     this._editorPos = pos;
     if (type === 'free') {
-      showFreeTextEditor({ text: text, pos: pos, size: size, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, onTextChange: this._onTextChange });
+      this._textEditController = showFreeTextEditor({ text: text, pos: pos, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, bordered: bordered });
     } else {
-      showBoundedTextEditor({ text: text, pos: pos, size: size, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, onTextChange: this._onTextChange })
+      this._textEditController = showBoundedTextEditor({ text: text, pos: pos, size: size, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, bordered: bordered })
     }
+    this._textEditController.on('text_change', argv => this._onTextChange(argv));
     this._isTextEditing = true;
   }
 
@@ -114,6 +116,8 @@ class App extends Component<any, AppState> {
       }
       this._canvasRef.current!.cameraDisable = false;
       this._isTextEditing = false;
+      this._textEditController?.clear();
+      this._textEditController = undefined;
       hideTextEditor();
     }
     if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(canvasPos, false) !== InteractingType.None) {
@@ -179,7 +183,10 @@ class App extends Component<any, AppState> {
   private _onTextChange = (text: string): void => {
     this._textBuffer = text;
     if (this._itemPool.selected !== undefined && this._itemPool.selected.isInteracting) {
-      this._itemPool.selected.onTextEdit(text);
+      const [pos, size, rotate] = this._itemPool.selected.onTextEdit(text);
+      this._textEditController!.pos = this._canvasRef.current!.toScreenPoint(pos);
+      this._textEditController!.size = size;
+      this._textEditController!.rotate = rotate;
     }
     this._updateCanvas();
   }
@@ -190,7 +197,7 @@ class App extends Component<any, AppState> {
       if (interactType === InteractingType.Text) {
         const [type, pos, size, rotate, text] = this._itemPool.selected.onTextEditStart();
         this._textBuffer = text;
-        this._showTextEditor(type, this._canvasRef.current!.toScreenPoint(pos), size, rotate, text, true);
+        this._showTextEditor(type, this._canvasRef.current!.toScreenPoint(pos), size, rotate, text, false);
         this._updateCanvas();
         return;
       } else if (interactType !== InteractingType.None) {

@@ -68,7 +68,7 @@ class MultiItemInteractor implements ItemInteractor {
         return ['none', ORIGIN, ZERO_SIZE, 0, ''];
     }
 
-    onTextEdit(text: string): void { }
+    onTextEdit(text: string): [Point, Size, number] { return [ORIGIN, ZERO_SIZE, 0]; }
 
     onTextEditEnd(text: string): void { }
 

@@ -32,7 +32,7 @@ interface ItemInteractor {
     get isInteracting(): boolean
     checkInteract(pos: Point, doubleClick: boolean): InteractingType;
     onTextEditStart(): [string, Point, Size, number, string];
-    onTextEdit(text: string): void;
+    onTextEdit(text: string): [Point, Size, number];
     onTextEditEnd(text: string): void;
     onDragStart(pos: Point): void;
     onDragMove(pos: Point): void;
