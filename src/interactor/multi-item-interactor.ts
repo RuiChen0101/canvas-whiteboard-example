@@ -4,11 +4,11 @@ import Circle from '../shape/circle';
 import Rectangle from '../shape/rectangle';
 import { ORIGIN, Point } from '../util/point';
 import { Size, ZERO_SIZE } from '../util/size';
+import { FontStyle } from '../type/font-style';
 import MoveStrategy, { FreeMoveStrategy } from './move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from './rotate-strategy';
-import ResizeStrategy, { DiagonalResizeStrategy } from './resize-strategy';
+import ResizeStrategy, { GroupResizeStrategy } from './resize-strategy';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, ItemInteractor, PADDING } from './item-interactor';
-import { FontStyle } from '../type/font-style';
 
 class MultiItemInteractor implements ItemInteractor {
     private _items: Item[] = [];
@@ -23,7 +23,7 @@ class MultiItemInteractor implements ItemInteractor {
         lastPos: ORIGIN,
     };
 
-    private _resizeStrategy: ResizeStrategy = new DiagonalResizeStrategy();
+    private _resizeStrategy: ResizeStrategy = new GroupResizeStrategy();
     private _rotateStrategy: RotateStrategy = new FreeRotateStrategy();
     private _moveStrategy: MoveStrategy = new FreeMoveStrategy();
 

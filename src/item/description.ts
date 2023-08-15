@@ -1,13 +1,13 @@
 import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
+import { FontStyle } from '../type/font-style';
 import { ItemBase, ItemEvent, ItemState, TextEditableItem } from './item';
 import { measureTextHeight, measureTextWidth } from '../util/font-matric';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
-import ResizeStrategy, { DiagonalResizeStrategy, NoResizeStrategy } from '../interactor/resize-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
+import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/resize-strategy';
 import TextEditStrategy, { FreeTextEditStrategy } from '../interactor/text-edit-strategy';
-import { FontStyle } from '../type/font-style';
 
 interface DescriptionProps {
     id: string;
