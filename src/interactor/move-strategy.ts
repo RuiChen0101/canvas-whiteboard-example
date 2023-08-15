@@ -10,7 +10,7 @@ class FreeMoveStrategy implements MoveStrategy {
     move(ctx: InteractorContext, items: Item[], pos: Point): void {
         const delta = diffPoints(pos, ctx.lastPos);
         for (const i of items) {
-            i.pos = addPoints(i.pos, delta);
+            i.setPos(addPoints(i.pos, delta));
         }
     }
 }

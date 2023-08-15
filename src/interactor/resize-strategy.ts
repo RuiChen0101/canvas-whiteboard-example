@@ -1,7 +1,7 @@
 import Item from '../item/item';
+import { InteractorContext } from './item-interactor';
 import { fourCornerForRotatedRectangle } from '../util/bounding-box';
 import { Point, addPoints, diffPoints, middlePoint, rotatePoint, upScalePoint } from '../util/point';
-import { InteractorContext } from './item-interactor';
 
 interface ResizeStrategy {
     resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void;
@@ -21,8 +21,8 @@ class FreeResizeStrategy {
             const newBottomRight = rotatePoint(bottomRight, newCenter, -i.rotate);
             const newSize = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
             if (newSize.w <= 1 || newSize.h <= 1) return;
-            i.pos = newTopLeft;
-            i.size = newSize;
+            i.setPos(newTopLeft);
+            i.setSize(newSize);
         }
     }
 
@@ -36,8 +36,8 @@ class FreeResizeStrategy {
             const newBottomLeft = rotatePoint(bottomLeft, newCenter, -i.rotate);
             const newSize = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
             if (newSize.w <= 1 || newSize.h <= 1) return;
-            i.pos = { x: newBottomLeft.x, y: newTopRight.y }
-            i.size = newSize;
+            i.setPos({ x: newBottomLeft.x, y: newTopRight.y });
+            i.setSize(newSize);
         }
     }
 
@@ -51,8 +51,8 @@ class FreeResizeStrategy {
             const newBottomLeft = rotatePoint(rbl, newCenter, -i.rotate);
             const newSize = { w: newTopRight.x - newBottomLeft.x, h: newBottomLeft.y - newTopRight.y };
             if (newSize.w <= 1 || newSize.h <= 1) return;
-            i.pos = { x: newBottomLeft.x, y: newTopRight.y }
-            i.size = newSize;
+            i.setPos({ x: newBottomLeft.x, y: newTopRight.y });
+            i.setSize(newSize);
         }
     }
 
@@ -66,8 +66,8 @@ class FreeResizeStrategy {
             const newBottomRight = rotatePoint(rbr, newCenter, -i.rotate);
             const newSize = { w: newBottomRight.x - newTopLeft.x, h: newBottomRight.y - newTopLeft.y };
             if (newSize.w <= 1 || newSize.h <= 1) return;
-            i.pos = newTopLeft;
-            i.size = newSize;
+            i.setPos(newTopLeft);
+            i.setSize(newSize);
         }
     }
 }
@@ -79,8 +79,8 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         const d = { x: ctx.bottomRight.x - (ctx.bottomRight.x * s), y: ctx.bottomRight.y - (ctx.bottomRight.y * s) };
         if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
-            i.pos = addPoints(upScalePoint(i.pos, s), d);
-            i.size = { w: i.size.w * s, h: i.size.h * s };
+            i.setPos(addPoints(upScalePoint(i.pos, s), d));
+            i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 
@@ -90,8 +90,8 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         const d = { x: ctx.bottomLeft.x - (ctx.bottomLeft.x * s), y: ctx.bottomLeft.y - (ctx.bottomLeft.y * s) };
         if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
-            i.pos = addPoints(upScalePoint(i.pos, s), d);
-            i.size = { w: i.size.w * s, h: i.size.h * s };
+            i.setPos(addPoints(upScalePoint(i.pos, s), d));
+            i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 
@@ -101,8 +101,8 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         const d = { x: ctx.topRight.x - (ctx.topRight.x * s), y: ctx.topRight.y - (ctx.topRight.y * s) };
         if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
-            i.pos = addPoints(upScalePoint(i.pos, s), d);
-            i.size = { w: i.size.w * s, h: i.size.h * s };
+            i.setPos(addPoints(upScalePoint(i.pos, s), d));
+            i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 
@@ -112,13 +112,13 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         const d = { x: ctx.topLeft.x - (ctx.topLeft.x * s), y: ctx.topLeft.y - (ctx.topLeft.y * s) };
         if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
         for (const i of items) {
-            i.pos = addPoints(upScalePoint(i.pos, s), d);
-            i.size = { w: i.size.w * s, h: i.size.h * s };
+            i.setPos(addPoints(upScalePoint(i.pos, s), d));
+            i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 }
 
-class NoneResizeStrategy implements ResizeStrategy {
+class NoResizeStrategy implements ResizeStrategy {
     resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void { }
     resizeTopRight(ctx: InteractorContext, items: Item[], pos: Point): void { }
     resizeBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void { }
@@ -129,4 +129,5 @@ export default ResizeStrategy;
 export {
     FreeResizeStrategy,
     DiagonalResizeStrategy,
+    NoResizeStrategy
 }

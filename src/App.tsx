@@ -16,7 +16,7 @@ import ItemPoolMemento from './item/item-pool-memento';
 import BoothDrawingTool from './tool/booth-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
-import Booth from './item/booth';
+import Booth from './item/box';
 
 interface AppState {
   currentTool: string;
@@ -44,7 +44,7 @@ class App extends Component<any, AppState> {
     }
     this._currentTool = new SelectionTool(this._itemPool);
     this._itemPool.addItem(new Description({ id: '1', text: 'booth1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 45 }));
   }
 
   componentDidMount(): void {

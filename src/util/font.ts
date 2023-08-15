@@ -19,7 +19,7 @@ const measureTextWidth = (text: string, fontFamily: string, fontSize: number): n
 
 const measureTextHeight = (text: string, fontSize: number, lineHeight: number): number => {
     const lineCount = (text.match(/\n/g) ?? []).length + 1;
-    return fontSize + (fontSize * lineHeight * (lineCount - 1));
+    return fontSize * lineHeight * lineCount;
 }
 
 export {

@@ -11,7 +11,7 @@ import { ORIGIN, Point, centerPoint, rotatePoint } from '../util/point';
 import TextEditStrategy, { BoundedTextEditStrategy, FreeTextEditStrategy } from './text-edit-strategy';
 import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, ItemInteractor, PADDING } from './item-interactor';
-import Booth from '../item/booth';
+import Booth from '../item/box';
 
 class SingleItemInteractor implements ItemInteractor {
     private _item: Item;
@@ -26,10 +26,10 @@ class SingleItemInteractor implements ItemInteractor {
         lastPos: ORIGIN,
     };
 
-    private _textEditStrategy: TextEditStrategy = new FreeTextEditStrategy();
-    private _resizeStrategy: ResizeStrategy = new FreeResizeStrategy();
-    private _rotateStrategy: RotateStrategy = new FreeRotateStrategy();
-    private _moveStrategy: MoveStrategy = new FreeMoveStrategy();
+    private _textEditStrategy?: TextEditStrategy;
+    private _resizeStrategy: ResizeStrategy;
+    private _rotateStrategy: RotateStrategy;
+    private _moveStrategy: MoveStrategy;
 
     private _interact: InteractingType = InteractingType.None;
 
@@ -43,6 +43,9 @@ class SingleItemInteractor implements ItemInteractor {
 
     constructor(item: Item) {
         this._item = item;
+        this._resizeStrategy = item.resizeStrategy;
+        this._rotateStrategy = item.rotateStrategy;
+        this._moveStrategy = item.moveStrategy;
         this._inferPosAndSize();
     }
 
@@ -79,22 +82,20 @@ class SingleItemInteractor implements ItemInteractor {
 
     onTextEditStart(): [string, Point, Size, number, string] {
         if (!('textEditable' in this._item)) return ['none', ORIGIN, ZERO_SIZE, 0, ''];
-        if (this._item instanceof Booth) {
-            this._textEditStrategy = new BoundedTextEditStrategy();
-        } else {
-            this._textEditStrategy = new FreeTextEditStrategy();
-        }
+        this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
         this._interact = InteractingType.Text;
         return this._textEditStrategy.startEdit(this._context, this._item as TextEditableItem);
     }
 
     onTextEdit(text: string): [Point, Size, number] {
+        if (this._textEditStrategy === undefined) return [ORIGIN, ZERO_SIZE, 0];
         const [pos, size, rotate] = this._textEditStrategy.onEdit(this._context, this._item as TextEditableItem, text);
         this._inferPosAndSize();
         return [pos, size, rotate];
     }
 
     onTextEditEnd(text: string): void {
+        if (this._textEditStrategy === undefined) return;
         this._textEditStrategy.endEdit(this._context, this._item as TextEditableItem, text);
         this._interact = InteractingType.None;
         this._inferPosAndSize();

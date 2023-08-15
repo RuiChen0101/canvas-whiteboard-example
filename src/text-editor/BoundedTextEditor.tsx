@@ -32,7 +32,7 @@ class BoundedTextEditController extends EventNotifierBase implements TextEditCon
 
     set pos(p: Point) { this._editorRef.current!.pos = p; }
 
-    set size(s: Size) { console.log(s); this._editorRef.current!.size = s; }
+    set size(s: Size) { this._editorRef.current!.size = s; }
 
     set rotate(r: number) { this._editorRef.current!.rotate = r; }
 

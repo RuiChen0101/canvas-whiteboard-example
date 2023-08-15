@@ -1,31 +1,39 @@
+import Box from '../item/box';
 import Text from '../shape/text';
-import Booth from '../item/booth';
 import Shape from '../shape/shape';
 import Rotate from '../shape/rotate';
+import Obstacle from '../item/obstacle';
 import Rectangle from '../shape/rectangle';
-import { Point, centerPoint } from '../util/point';
-import Visitor, { VisitorBase } from './visitor';
 import Description from '../item/description';
+import Visitor, { VisitorBase } from './visitor';
+import { Point, centerPoint } from '../util/point';
 
 class DrawingVisitor extends VisitorBase implements Visitor {
     private _shapes: Shape[] = [];
 
-    visitBooth(booth: Booth): void {
+    visitBox(box: Box): void {
         const shapes: Shape[] = [
-            new Rectangle({ pos: booth.pos, size: booth.size }),
+            new Rectangle({ pos: box.pos, size: box.size }),
         ];
-        if (!booth.isEditing) {
-            shapes.push(new Text({ text: booth.name, pos: centerPoint(booth.pos, booth.size), vAlign: 'middle', hAlign: 'center' }));
+        if (!box.isEditing) {
+            shapes.push(new Text({ text: box.name, pos: centerPoint(box.pos, box.size), vAlign: 'middle', hAlign: 'center' }));
         }
-        this._shapes.push(...this._decoWithRotate(shapes, centerPoint(booth.pos, booth.size), booth.rotate));
+        this._shapes.push(...this._decoWithRotate(shapes, centerPoint(box.pos, box.size), box.rotate));
     }
 
     visitDescription(description: Description): void {
-        const shapes: Shape[] = []
+        const shapes: Shape[] = [];
         if (!description.isEditing) {
             shapes.push(new Text({ text: description.text, pos: description.pos }));
         }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(description.pos, description.size), description.rotate));
+    }
+
+    visitObstacle(obstacle: Obstacle): void {
+        const shapes: Shape[] = [
+            new Rectangle({ pos: obstacle.pos, size: obstacle.size, color: "#000" }),
+        ];
+        this._shapes.push(...this._decoWithRotate(shapes, centerPoint(obstacle.pos, obstacle.size), obstacle.rotate));
     }
 
     _decoWithRotate(shapes: Shape[], anchor: Point, rotate: number): Shape[] {

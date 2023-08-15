@@ -1,15 +1,15 @@
-import Booth from '../item/booth';
+import Box from '../item/box';
 import Obstacle from '../item/obstacle';
 import Description from '../item/description';
 
 interface Visitor {
-    visitBooth(booth: Booth): void
+    visitBox(box: Box): void
     visitObstacle(obstacle: Obstacle): void
     visitDescription(description: Description): void
 }
 
 abstract class VisitorBase implements Visitor {
-    visitBooth(booth: Booth): void { }
+    visitBox(box: Box): void { }
     visitObstacle(obstacle: Obstacle): void { }
     visitDescription(description: Description): void { }
 }

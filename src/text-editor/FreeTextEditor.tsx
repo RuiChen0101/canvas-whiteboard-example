@@ -114,8 +114,8 @@ class FreeTextEditor extends Component<FreeTextEditorProps, FreeTextEditorState>
             <div
                 className='free-text-editor-root'
                 style={{
-                    top: this.state.pos.y - (8 * this.props.scale),
-                    left: this.state.pos.x - (6 * this.props.scale),
+                    top: this.state.pos.y - (5 * this.props.scale),
+                    left: this.state.pos.x - (4 * this.props.scale),
                     transform: `scale(${this.props.scale})`
                 }}
             >

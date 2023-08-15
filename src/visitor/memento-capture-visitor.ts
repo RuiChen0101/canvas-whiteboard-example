@@ -1,16 +1,16 @@
+import Box from '../item/box';
 import Visitor from './visitor';
-import Booth from '../item/booth';
 import Obstacle from '../item/obstacle';
-import Description from '../item/description';
 import { ItemRecord } from '../item/item';
+import Description from '../item/description';
 
 class MementoCaptureVisitor implements Visitor {
     private _records: ItemRecord[] = [];
 
-    visitBooth(booth: Booth): void {
+    visitBox(box: Box): void {
         this._records.push({
-            type: 'booth',
-            state: booth.state
+            type: 'box',
+            state: box.state
         });
     }
 

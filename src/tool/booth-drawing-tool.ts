@@ -4,7 +4,7 @@ import Random from '../util/random';
 import ItemPool from '../item/item-pool';
 import Rectangle from '../shape/rectangle';
 import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
-import Booth from '../item/booth';
+import Booth from '../item/box';
 
 class BoothDrawingTool implements Tool {
     private _startPos: Point = ORIGIN;
