@@ -1,11 +1,6 @@
 import Canvas from './Canvas';
-import { Component, ReactNode, createRef } from 'react';
-
-import './App.scss';
-
-import Tool from './tool/tool';
+import Booth from './item/box';
 import Random from './util/random';
-import Toolbox from './overlay/Toolbox';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
 import { ORIGIN, Point } from './util/point';
@@ -13,10 +8,16 @@ import { Size, ZERO_SIZE } from './util/size';
 import SelectionTool from './tool/selection-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
+import { Component, ReactNode, createRef } from 'react';
 import BoothDrawingTool from './tool/booth-drawing-tool';
+import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import { InteractingType } from './interactor/item-interactor';
+
+import './App.scss';
+
+import Tool from './tool/tool';
+import Toolbox from './overlay/Toolbox';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
-import Booth from './item/box';
 
 interface AppState {
   currentTool: string;
@@ -80,14 +81,14 @@ class App extends Component<any, AppState> {
     this._updateCanvas();
   }
 
-  private _showTextEditor = (type: string, pos: Point, size: Size, rotate: number, text: string, bordered: boolean = true): void => {
+  private _showTextEditor = (type: string, pos: Point, size: Size, rotate: number, style: FontStyle, text: string, bordered: boolean = true): void => {
     if (type === 'none') return;
     this._canvasRef.current!.cameraDisable = true;
     this._editorPos = pos;
     if (type === 'free') {
-      this._textEditController = showFreeTextEditor({ text: text, pos: pos, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, bordered: bordered });
+      this._textEditController = showFreeTextEditor({ text: text, pos: pos, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, fontStyle: style, bordered: bordered });
     } else {
-      this._textEditController = showBoundedTextEditor({ text: text, pos: pos, size: size, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, bordered: bordered })
+      this._textEditController = showBoundedTextEditor({ text: text, pos: pos, size: size, scale: this._canvasRef.current!.cameraState.scale, rotate: rotate, fontStyle: style, bordered: bordered })
     }
     this._textEditController.on('text_change', argv => this._onTextChange(argv));
     this._isTextEditing = true;
@@ -195,9 +196,9 @@ class App extends Component<any, AppState> {
     if (this._itemPool.selected !== undefined) {
       const interactType = this._itemPool.selected.checkInteract(canvasPos, true);
       if (interactType === InteractingType.Text) {
-        const [type, pos, size, rotate, text] = this._itemPool.selected.onTextEditStart();
+        const [type, pos, size, rotate, style, text] = this._itemPool.selected.onTextEditStart();
         this._textBuffer = text;
-        this._showTextEditor(type, this._canvasRef.current!.toScreenPoint(pos), size, rotate, text, false);
+        this._showTextEditor(type, this._canvasRef.current!.toScreenPoint(pos), size, rotate, style, text, false);
         this._updateCanvas();
         return;
       } else if (interactType !== InteractingType.None) {
@@ -206,7 +207,7 @@ class App extends Component<any, AppState> {
     }
     this._itemPool.clearSelect();
     this._textBuffer = '';
-    this._showTextEditor('free', windowPos, ZERO_SIZE, 0, '');
+    this._showTextEditor('free', windowPos, ZERO_SIZE, 0, DEFAULT_STYLE, '');
     this._updateCanvas();
   }
 

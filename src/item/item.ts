@@ -1,6 +1,7 @@
 import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
+import { FontStyle } from '../type/font-style';
 import MoveStrategy from '../interactor/move-strategy';
 import ResizeStrategy from '../interactor/resize-strategy';
 import RotateStrategy from '../interactor/rotate-strategy';
@@ -48,6 +49,7 @@ interface TextEditableItem extends Item {
     setIsEditing(b: boolean): void;
     setText(value: string): void;
     get text(): string;
+    get fontStyle(): FontStyle;
     get textEditStrategy(): TextEditStrategy;
 }
 

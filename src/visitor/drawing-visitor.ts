@@ -24,7 +24,13 @@ class DrawingVisitor extends VisitorBase implements Visitor {
     visitDescription(description: Description): void {
         const shapes: Shape[] = [];
         if (!description.isEditing) {
-            shapes.push(new Text({ text: description.text, pos: description.pos }));
+            shapes.push(new Text({
+                text: description.text,
+                pos: description.pos,
+                fontSize: description.fontStyle.size,
+                fontFamily: description.fontStyle.family,
+                lineHeight: description.fontStyle.lineHight,
+            }));
         }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(description.pos, description.size), description.rotate));
     }

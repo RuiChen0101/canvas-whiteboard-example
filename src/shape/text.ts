@@ -9,7 +9,7 @@ type TextProp = {
     lineHeight?: number;
     vAlign?: 'top' | 'middle' | 'bottom';
     hAlign?: 'center' | 'start' | 'end';
-    font?: string;
+    fontFamily?: string;
     color?: string;
 }
 
@@ -21,14 +21,14 @@ class Text implements Shape {
     private _lineHeight: number;
     private _vAlign: 'top' | 'middle' | 'bottom';
     private _hAlign: 'center' | 'start' | 'end';
-    private _font: string;
+    private _fontFamily: string;
     private _color: string;
 
     constructor(prop?: TextProp) {
         this._width = prop?.width;
         this._pos = prop?.pos ?? ORIGIN;
         this._text = prop?.text ?? "";
-        this._font = prop?.font ?? "serif";
+        this._fontFamily = prop?.fontFamily ?? "serif";
         this._fontSize = prop?.fontSize ?? 16;
         this._lineHeight = prop?.lineHeight ?? 1.2;
         this._vAlign = prop?.vAlign ?? 'top';
@@ -44,7 +44,7 @@ class Text implements Shape {
     draw(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D): void {
         context.beginPath();
         context.fillStyle = this._color;
-        context.font = `${this._fontSize}px ${this._font}`;
+        context.font = `${this._fontSize}px ${this._fontFamily}`;
         context.textAlign = this._hAlign;
         context.textBaseline = this._vAlign;
         let topStart = this._pos.y;

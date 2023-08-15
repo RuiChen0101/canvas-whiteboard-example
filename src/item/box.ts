@@ -1,9 +1,10 @@
 import Visitor from '../visitor/visitor';
+import { DEFAULT_STYLE, FontStyle } from '../type/font-style';
 import { ItemBase, ItemState, TextEditableItem } from './item';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
+import ResizeStrategy, { FreeResizeStrategy } from '../interactor/resize-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
 import TextEditStrategy, { BoundedTextEditStrategy } from '../interactor/text-edit-strategy';
-import ResizeStrategy, { FreeResizeStrategy, NoResizeStrategy } from '../interactor/resize-strategy';
 
 interface BoxProps extends ItemState {
     name: string;
@@ -17,6 +18,7 @@ interface BoxState extends ItemState {
 class Box extends ItemBase<BoxState> implements TextEditableItem {
     public get textEditable(): boolean { return true; }
     public get text(): string { return this._state.name; }
+    public get fontStyle(): FontStyle { return DEFAULT_STYLE; }
     public setText(value: string) { this._state.name = value; }
 
     public get name(): string { return this._state.name; }

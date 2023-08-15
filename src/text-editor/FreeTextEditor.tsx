@@ -1,18 +1,19 @@
 import { RefObject } from 'react';
 import { Size } from '../util/size';
 import { Point } from '../util/point';
+import { FontStyle } from '../type/font-style';
+import { EventNotifierBase } from '../util/event';
+import { TextEditController, TextEditor } from './TextEditor';
 import { Component, createRef, ClipboardEvent, ReactNode, FormEvent } from 'react';
 
 import './FreeTextEditor.scss';
-
-import { EventNotifierBase } from '../util/event';
-import { TextEditController, TextEditor } from './TextEditor';
 
 interface FreeTextEditorProps {
     pos: Point;
     scale: number;
     rotate: number;
     text: string;
+    fontStyle: FontStyle;
     bordered: boolean;
     onTextChange: (text: string) => void;
 }
@@ -124,6 +125,9 @@ class FreeTextEditor extends Component<FreeTextEditorProps, FreeTextEditorState>
                     ref={this._inputRef}
                     className={`text-editor${!!this.props.bordered ? ' bordered' : ''}`}
                     style={{
+                        fontFamily: this.props.fontStyle.family,
+                        fontSize: `${this.props.fontStyle.size}px`,
+                        lineHeight: this.props.fontStyle.lineHight,
                         transform: `rotate(${this.state.rotate}deg)`
                     }}
                     contentEditable="true"

@@ -8,6 +8,7 @@ import MoveStrategy, { FreeMoveStrategy } from './move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from './rotate-strategy';
 import ResizeStrategy, { DiagonalResizeStrategy } from './resize-strategy';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, ItemInteractor, PADDING } from './item-interactor';
+import { FontStyle } from '../type/font-style';
 
 class MultiItemInteractor implements ItemInteractor {
     private _items: Item[] = [];
@@ -64,13 +65,17 @@ class MultiItemInteractor implements ItemInteractor {
         return InteractingType.None;
     }
 
-    onTextEditStart(): [string, Point, Size, number, string] {
-        return ['none', ORIGIN, ZERO_SIZE, 0, ''];
+    onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
+        throw `cannot edit text when multiple item selected`;
     }
 
-    onTextEdit(text: string): [Point, Size, number] { return [ORIGIN, ZERO_SIZE, 0]; }
+    onTextEdit(text: string): [Point, Size, number] {
+        throw `cannot edit text when multiple item selected`;
+    }
 
-    onTextEditEnd(text: string): void { }
+    onTextEditEnd(text: string): void {
+        throw `cannot edit text when multiple item selected`;
+    }
 
     onDragStart(pos: Point): void {
         const interact = this.checkInteract(pos);

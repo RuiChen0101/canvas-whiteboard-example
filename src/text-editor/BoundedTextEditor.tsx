@@ -1,5 +1,6 @@
 import { Size } from '../util/size';
 import { Point } from '../util/point';
+import { FontStyle } from '../type/font-style';
 import { EventNotifierBase } from '../util/event';
 import { TextEditController, TextEditor } from './TextEditor';
 import { Component, FormEvent, ClipboardEvent, ReactNode, createRef, RefObject } from 'react';
@@ -12,6 +13,7 @@ interface BoundedTextEditorProps {
     rotate: number;
     text: string;
     size: Size;
+    fontStyle: FontStyle;
     bordered: boolean;
     onTextChange: (text: string) => void;
 }
@@ -115,6 +117,9 @@ class BoundedTextEditor extends Component<BoundedTextEditorProps, BoundedTextEdi
                     ref={this._inputRef}
                     className={`text-editor${!!this.props.bordered ? ' bordered' : ''}`}
                     style={{
+                        fontFamily: this.props.fontStyle.family,
+                        fontSize: `${this.props.fontStyle.size}px`,
+                        lineHeight: this.props.fontStyle.lineHight,
                         width: this.state.size.w,
                         height: this.state.size.h,
                         transform: `rotate(${this.state.rotate}deg)`

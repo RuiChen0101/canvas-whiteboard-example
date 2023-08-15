@@ -2,11 +2,12 @@ import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import { ItemBase, ItemEvent, ItemState, TextEditableItem } from './item';
-import { measureTextHeight, measureTextWidth } from '../util/font';
+import { measureTextHeight, measureTextWidth } from '../util/font-matric';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
 import ResizeStrategy, { DiagonalResizeStrategy, NoResizeStrategy } from '../interactor/resize-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
 import TextEditStrategy, { FreeTextEditStrategy } from '../interactor/text-edit-strategy';
+import { FontStyle } from '../type/font-style';
 
 interface DescriptionProps {
     id: string;
@@ -17,16 +18,19 @@ interface DescriptionProps {
 
 interface DescriptionState extends ItemState {
     text: string;
+    fontSize: number;
     isEditing: boolean;
 }
 
 class Description extends ItemBase<DescriptionState> implements TextEditableItem {
     public get textEditable(): boolean { return true; }
     public get text(): string { return this._state.text; }
+    public get fontStyle(): FontStyle { return { family: "serif", size: this._state.fontSize, lineHight: 1.2 } };
     public setText(value: string) { this._state.text = value; }
 
     public override setSize(size: Size) {
         this._state.size = size;
+        this._state.fontSize = size.h / ((this._state.text.match(/\n/g) ?? []).length + 1) / 1.2;
         this._emit(ItemEvent.Resize, this._state.id);
     }
 
@@ -59,6 +63,7 @@ class Description extends ItemBase<DescriptionState> implements TextEditableItem
             ...prop,
             size: { w: measureTextWidth(prop.text, 'serif', 16), h: measureTextHeight(prop.text, 16, 1.2) },
             isEditing: false,
+            fontSize: 16,
         });
     }
 

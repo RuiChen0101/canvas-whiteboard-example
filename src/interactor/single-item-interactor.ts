@@ -2,16 +2,16 @@ import Shape from '../shape/shape';
 import Circle from '../shape/circle';
 import Rotate from '../shape/rotate';
 import Rectangle from '../shape/rectangle';
+import MoveStrategy from './move-strategy';
 import { Size, ZERO_SIZE } from '../util/size';
+import ResizeStrategy from './resize-strategy';
+import RotateStrategy from './rotate-strategy';
+import TextEditStrategy from './text-edit-strategy';
 import Item, { TextEditableItem } from '../item/item';
-import MoveStrategy, { FreeMoveStrategy } from './move-strategy';
-import ResizeStrategy, { FreeResizeStrategy } from './resize-strategy';
-import RotateStrategy, { FreeRotateStrategy } from './rotate-strategy';
 import { ORIGIN, Point, centerPoint, rotatePoint } from '../util/point';
-import TextEditStrategy, { BoundedTextEditStrategy, FreeTextEditStrategy } from './text-edit-strategy';
 import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 import { ANCHOR_SIZE, InteractingType, InteractorContext, ItemInteractor, PADDING } from './item-interactor';
-import Booth from '../item/box';
+import { FontStyle } from '../type/font-style';
 
 class SingleItemInteractor implements ItemInteractor {
     private _item: Item;
@@ -80,15 +80,15 @@ class SingleItemInteractor implements ItemInteractor {
         return InteractingType.None;
     }
 
-    onTextEditStart(): [string, Point, Size, number, string] {
-        if (!('textEditable' in this._item)) return ['none', ORIGIN, ZERO_SIZE, 0, ''];
+    onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
+        if (!('textEditable' in this._item)) throw 'selected item dose not support text edit';
         this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
         this._interact = InteractingType.Text;
         return this._textEditStrategy.startEdit(this._context, this._item as TextEditableItem);
     }
 
     onTextEdit(text: string): [Point, Size, number] {
-        if (this._textEditStrategy === undefined) return [ORIGIN, ZERO_SIZE, 0];
+        if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
         const [pos, size, rotate] = this._textEditStrategy.onEdit(this._context, this._item as TextEditableItem, text);
         this._inferPosAndSize();
         return [pos, size, rotate];

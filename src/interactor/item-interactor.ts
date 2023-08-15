@@ -1,7 +1,8 @@
 import Item from '../item/item';
 import Shape from '../shape/shape';
-import { Point } from '../util/point';
 import { Size } from '../util/size';
+import { Point } from '../util/point';
+import { FontStyle } from '../type/font-style';
 
 enum InteractingType {
     Text,
@@ -31,7 +32,7 @@ interface ItemInteractor {
     get items(): Item[];
     get isInteracting(): boolean
     checkInteract(pos: Point, doubleClick: boolean): InteractingType;
-    onTextEditStart(): [string, Point, Size, number, string];
+    onTextEditStart(): [string, Point, Size, number, FontStyle, string];
     onTextEdit(text: string): [Point, Size, number];
     onTextEditEnd(text: string): void;
     onDragStart(pos: Point): void;
