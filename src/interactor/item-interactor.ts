@@ -30,7 +30,8 @@ const ANCHOR_SIZE: Size = Object.freeze({ w: 8, h: 8 });
 
 interface ItemInteractor {
     get items(): Item[];
-    get isInteracting(): boolean
+    get isInteracting(): boolean;
+    get stillStatic(): boolean;
     checkInteract(pos: Point, doubleClick: boolean): InteractingType;
     onTextEditStart(): [string, Point, Size, number, FontStyle, string];
     onTextEdit(text: string): [Point, Size, number];

@@ -1,7 +1,7 @@
 import { Component, ReactNode } from 'react';
 import { faSquare } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowPointer } from '@fortawesome/free-solid-svg-icons';
+import { faArrowPointer, faSquare as faSolidSquare } from '@fortawesome/free-solid-svg-icons';
 
 import './Toolbox.scss';
 
@@ -18,8 +18,11 @@ class Toolbox extends Component<ToolboxProps> {
                     <div className={`tool${this.props.currentTool === 'select' ? ' active' : ''}`} onClick={() => this.props.onToolChange('select')}>
                         <FontAwesomeIcon icon={faArrowPointer} />
                     </div>
-                    <div className={`tool${this.props.currentTool === 'booth-draw' ? ' active' : ''}`} onClick={() => this.props.onToolChange('booth-draw')}>
+                    <div className={`tool${this.props.currentTool === 'box-draw' ? ' active' : ''}`} onClick={() => this.props.onToolChange('box-draw')}>
                         <FontAwesomeIcon icon={faSquare} />
+                    </div>
+                    <div className={`tool${this.props.currentTool === 'obstacle-draw' ? ' active' : ''}`} onClick={() => this.props.onToolChange('obstacle-draw')}>
+                        <FontAwesomeIcon icon={faSolidSquare} />
                     </div>
                 </div>
             </div>

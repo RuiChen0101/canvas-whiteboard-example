@@ -6,10 +6,10 @@ import Description from './item/description';
 import { ORIGIN, Point } from './util/point';
 import { Size, ZERO_SIZE } from './util/size';
 import SelectionTool from './tool/selection-tool';
+import BoxDrawingTool from './tool/box-drawing-tool';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import { Component, ReactNode, createRef } from 'react';
-import BoothDrawingTool from './tool/booth-drawing-tool';
 import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import { InteractingType } from './interactor/item-interactor';
 
@@ -18,6 +18,7 @@ import './App.scss';
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
+import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 
 interface AppState {
   currentTool: string;
@@ -74,10 +75,9 @@ class App extends Component<any, AppState> {
   }
 
   private _restoreItemPool = (): void => {
-    const history = this._historyStack.pop()
-    if (history !== undefined) {
-      this._itemPool.restore(history);
-    }
+    const history = this._historyStack.pop();
+    if (history === undefined) return;
+    this._itemPool.restore(history);
     this._updateCanvas();
   }
 
@@ -122,10 +122,8 @@ class App extends Component<any, AppState> {
       hideTextEditor();
     }
     if (this._itemPool.selected !== undefined && this._itemPool.selected.checkInteract(canvasPos, false) !== InteractingType.None) {
-      this._saveItemPool();
       this._itemPool.selected.onDragStart(canvasPos);
     } else {
-      if (!this._currentTool.isStatic) this._saveItemPool();
       this._currentTool.onStart(canvasPos);
     }
     this._updateCanvas();
@@ -135,6 +133,7 @@ class App extends Component<any, AppState> {
     if (this._itemPool.selected?.isInteracting ?? false) {
       this._itemPool.selected!.onDragEnd(canvasPos);
     } else {
+      if (!this._currentTool.isStatic) this._saveItemPool();
       this._currentTool.onEnd(canvasPos);
       if (this.state.currentTool !== 'select') {
         this._onToolChange('select');
@@ -145,6 +144,7 @@ class App extends Component<any, AppState> {
 
   private _onDragMove = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
+      if (this._itemPool.selected!.stillStatic) { this._saveItemPool(); }
       this._itemPool.selected!.onDragMove(canvasPos);
     } else {
       this._currentTool.onMove(canvasPos);
@@ -184,6 +184,7 @@ class App extends Component<any, AppState> {
   private _onTextChange = (text: string): void => {
     this._textBuffer = text;
     if (this._itemPool.selected !== undefined && this._itemPool.selected.isInteracting) {
+      if (this._itemPool.selected!.stillStatic) { this._saveItemPool(); }
       const [pos, size, rotate] = this._itemPool.selected.onTextEdit(text);
       this._textEditController!.pos = this._canvasRef.current!.toScreenPoint(pos);
       this._textEditController!.size = size;
@@ -221,8 +222,15 @@ class App extends Component<any, AppState> {
           cursorType: this._currentTool.cursor
         });
         break;
-      case 'booth-draw':
-        this._currentTool = new BoothDrawingTool(this._itemPool);
+      case 'box-draw':
+        this._currentTool = new BoxDrawingTool(this._itemPool);
+        this.setState({
+          currentTool: toolName,
+          cursorType: this._currentTool.cursor
+        });
+        break;
+      case 'obstacle-draw':
+        this._currentTool = new ObstacleDrawingTool(this._itemPool);
         this.setState({
           currentTool: toolName,
           cursorType: this._currentTool.cursor

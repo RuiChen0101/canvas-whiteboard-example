@@ -33,12 +33,18 @@ class SingleItemInteractor implements ItemInteractor {
 
     private _interact: InteractingType = InteractingType.None;
 
+    private _stillStatic: boolean = true;
+
     public get items(): Item[] {
         return [this._item];
     }
 
     public get isInteracting(): boolean {
         return this._interact !== InteractingType.None;
+    }
+
+    public get stillStatic(): boolean {
+        return this._stillStatic;
     }
 
     constructor(item: Item) {
@@ -82,6 +88,7 @@ class SingleItemInteractor implements ItemInteractor {
 
     onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
         if (!('textEditable' in this._item)) throw 'selected item dose not support text edit';
+        this._stillStatic = true;
         this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
         this._interact = InteractingType.Text;
         return this._textEditStrategy.startEdit(this._context, this._item as TextEditableItem);
@@ -89,13 +96,15 @@ class SingleItemInteractor implements ItemInteractor {
 
     onTextEdit(text: string): [Point, Size, number] {
         if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
+        this._stillStatic = false;
         const [pos, size, rotate] = this._textEditStrategy.onEdit(this._context, this._item as TextEditableItem, text);
         this._inferPosAndSize();
         return [pos, size, rotate];
     }
 
     onTextEditEnd(text: string): void {
-        if (this._textEditStrategy === undefined) return;
+        if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
+        this._stillStatic = false;
         this._textEditStrategy.endEdit(this._context, this._item as TextEditableItem, text);
         this._interact = InteractingType.None;
         this._inferPosAndSize();
@@ -104,13 +113,14 @@ class SingleItemInteractor implements ItemInteractor {
     onDragStart(pos: Point): void {
         const interact = this.checkInteract(pos);
         if (interact === InteractingType.None) return;
+        this._stillStatic = true;
         this._interact = interact;
         this._context.lastPos = pos;
     }
 
     onDragMove(pos: Point): void {
         if (this._interact === InteractingType.None) return;
-
+        this._stillStatic = false;
         switch (this._interact) {
             case InteractingType.Body:
                 this._moveStrategy.move(this._context, [this._item], pos);
@@ -131,14 +141,14 @@ class SingleItemInteractor implements ItemInteractor {
                 this._rotateStrategy.rotate(this._context, [this._item], pos);
                 break;
         }
-        this._context.lastPos = { ...pos };
+        this._context.lastPos = pos;
 
         this._inferPosAndSize();
     }
 
     onDragEnd(pos: Point): void {
         if (this._interact === InteractingType.None) return;
-
+        this._stillStatic = false;
         this._interact = InteractingType.None;
         this._context.lastPos = pos;
     }

@@ -6,7 +6,7 @@ import Rectangle from '../shape/rectangle';
 import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
 import Booth from '../item/box';
 
-class BoothDrawingTool implements Tool {
+class BoxDrawingTool implements Tool {
     private _startPos: Point = ORIGIN;
     private _endPos: Point = ORIGIN;
     private _activate: boolean = false;
@@ -55,4 +55,4 @@ class BoothDrawingTool implements Tool {
     }
 }
 
-export default BoothDrawingTool;
+export default BoxDrawingTool;

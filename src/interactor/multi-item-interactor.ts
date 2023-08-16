@@ -29,12 +29,18 @@ class MultiItemInteractor implements ItemInteractor {
 
     private _interact: InteractingType = InteractingType.None;
 
+    private _stillStatic: boolean = true;
+
     public get items(): Item[] {
         return this._items;
     }
 
     public get isInteracting(): boolean {
         return this._interact !== InteractingType.None;
+    }
+
+    public get stillStatic(): boolean {
+        return this._stillStatic;
     }
 
     constructor(items: Item[]) {
@@ -80,13 +86,14 @@ class MultiItemInteractor implements ItemInteractor {
     onDragStart(pos: Point): void {
         const interact = this.checkInteract(pos);
         if (interact === InteractingType.None) return;
+        this._stillStatic = true;
         this._interact = interact;
         this._context.lastPos = pos;
     }
 
     onDragMove(pos: Point): void {
         if (this._interact === InteractingType.None) return;
-
+        this._stillStatic = false;
         switch (this._interact) {
             case InteractingType.Body:
                 this._moveStrategy.move(this._context, this._items, pos);
@@ -114,7 +121,7 @@ class MultiItemInteractor implements ItemInteractor {
 
     onDragEnd(pos: Point): void {
         if (this._interact === InteractingType.None) return;
-
+        this._stillStatic = false;
         this._interact = InteractingType.None;
         this._context.lastPos = pos;
     }
