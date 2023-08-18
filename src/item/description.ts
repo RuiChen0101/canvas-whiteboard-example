@@ -58,13 +58,20 @@ class Description extends ItemBase<DescriptionState> implements TextEditableItem
         return new FreeTextEditStrategy();
     }
 
-    constructor(prop: DescriptionProps) {
-        super({
-            ...prop,
-            size: { w: measureTextWidth(prop.text, 'serif', 16), h: measureTextHeight(prop.text, 16, 1.2) },
-            isEditing: false,
-            fontSize: 16,
-        });
+    constructor(props: DescriptionProps);
+    constructor(state: DescriptionState);
+
+    constructor(argv: DescriptionProps | DescriptionState) {
+        if ('isEditing' in argv && 'fontSize' in argv) {
+            super({ ...argv });
+        } else {
+            super({
+                ...argv,
+                size: { w: measureTextWidth(argv.text, 'serif', 16), h: measureTextHeight(argv.text, 16, 1.2) },
+                isEditing: false,
+                fontSize: 16,
+            });
+        }
     }
 
     visit(visitor: Visitor): void {

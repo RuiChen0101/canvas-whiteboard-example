@@ -48,11 +48,15 @@ class Box extends ItemBase<BoxState> implements TextEditableItem {
         return new BoundedTextEditStrategy();
     }
 
-    constructor(prop: BoxProps) {
-        super({
-            ...prop,
-            isEditing: false
-        });
+    constructor(props: BoxProps);
+    constructor(state: BoxState);
+
+    constructor(argv: BoxProps | BoxState) {
+        if ('isEditing' in argv) {
+            super({ ...argv });
+        } else {
+            super({ ...argv, isEditing: false });
+        }
     }
 
     visit(visitor: Visitor): void {

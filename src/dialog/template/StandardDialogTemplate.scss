@@ -1,0 +1,11 @@
+.standard-dialog-template {
+    max-width: 500px;
+
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 75px;
+    }
+}

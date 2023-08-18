@@ -1,5 +1,6 @@
+import Box from './item/box';
 import Canvas from './Canvas';
-import Booth from './item/box';
+import Photo from './item/photo';
 import Random from './util/random';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
@@ -11,6 +12,7 @@ import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import { Component, ReactNode, createRef } from 'react';
 import { DEFAULT_STYLE, FontStyle } from './type/font-style';
+import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
 
 import './App.scss';
@@ -18,9 +20,14 @@ import './App.scss';
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
-import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
+import Spinner from 'react-bootstrap/esm/Spinner';
+import CollectImageUrlVisitor from './visitor/collect-image-url-visitor';
+import ImagePreloader, { ImageData } from './preloader/image-preload';
+import { showDialog } from './dialog/base/DialogBase';
+import ImageSelectDialog from './dialog/image/ImageSelectDialog';
 
 interface AppState {
+  isLoading: boolean;
   currentTool: string;
   cursorType: string;
 }
@@ -30,6 +37,8 @@ class App extends Component<any, AppState> {
   private _itemPool: ItemPool = new ItemPool({ w: 1920, h: 1080 });
   private _currentTool: Tool;
   private _historyStack: ItemPoolMemento[] = [];
+
+  private _imageData: Map<string, ImageData> = new Map();
 
   private _textEditController?: TextEditController = undefined;
   private _isTextEditing: boolean = false;
@@ -41,16 +50,24 @@ class App extends Component<any, AppState> {
   constructor(prop: any) {
     super(prop);
     this.state = {
+      isLoading: true,
       currentTool: 'select',
       cursorType: 'default',
     }
     this._currentTool = new SelectionTool(this._itemPool);
-    this._itemPool.addItem(new Description({ id: '1', text: 'booth1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Booth({ id: '2', name: 'booth2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 45 }));
+    this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Box({ id: '2', name: 'box2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 45 }));
+    this._itemPool.addItem(new Photo({ id: '3', url: `${process.env.PUBLIC_URL}/logo512.png`, size: { w: 128, h: 128 }, pos: { x: 300, y: 300 }, rotate: 0 }))
   }
 
-  componentDidMount(): void {
-    this._updateCanvas();
+  async componentDidMount(): Promise<void> {
+    const visitor = new CollectImageUrlVisitor();
+    this._itemPool.visit(visitor);
+    const preload = new ImagePreloader();
+    await preload.load(visitor.getResult());
+    this._imageData = preload.getResult();
+    this.setState({ isLoading: false });
+    setTimeout(() => this._updateCanvas(), 100);
     window.addEventListener('keydown', this._onKeyboardDown);
   }
 
@@ -59,10 +76,8 @@ class App extends Component<any, AppState> {
   }
 
   private _updateCanvas = (): void => {
-    const drawVisitor = new DrawingVisitor();
-    for (const i of this._itemPool.items) {
-      i.visit(drawVisitor);
-    }
+    const drawVisitor = new DrawingVisitor(this._imageData);
+    this._itemPool.visit(drawVisitor);
     const shapes = drawVisitor.getResult();
     shapes.push(...this._currentTool.draw());
     shapes.push(...(this._itemPool.selected?.draw() ?? []));
@@ -78,6 +93,14 @@ class App extends Component<any, AppState> {
     const history = this._historyStack.pop();
     if (history === undefined) return;
     this._itemPool.restore(history);
+    this._updateCanvas();
+  }
+
+  private _addImage = (imageData: ImageData): void => {
+    console.log(imageData);
+    this._imageData.set(imageData.urlHash, imageData);
+    const pos = { x: (window.innerWidth / 2) - (imageData.size.w / 2), y: (window.innerHeight / 2) - (imageData.size.h / 2) };
+    this._itemPool.addItem(new Photo({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(pos), size: imageData.size, rotate: 0, url: imageData.url }));
     this._updateCanvas();
   }
 
@@ -243,12 +266,23 @@ class App extends Component<any, AppState> {
     this._updateCanvas();
   }
 
+  private _showImageSelectDialog = (): void => {
+    showDialog((close: () => void): ReactNode => {
+      return (<ImageSelectDialog onClose={close} onSuccess={this._addImage} />)
+    });
+  }
+
   render(): ReactNode {
+    if (this.state.isLoading) return (<div id="app" className="d-flex justify-content-center align-items-center"><Spinner animation="border" /></div>)
     return (
       <div
         id="app"
         style={{ cursor: this.state.cursorType }}>
-        <Toolbox currentTool={this.state.currentTool} onToolChange={this._onToolChange} />
+        <Toolbox
+          onAddImage={this._showImageSelectDialog}
+          currentTool={this.state.currentTool}
+          onToolChange={this._onToolChange}
+        />
         <Canvas
           ref={this._canvasRef}
           cameraBound={{ w: 1920, h: 1080 }}

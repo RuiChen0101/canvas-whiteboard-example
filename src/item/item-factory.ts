@@ -1,4 +1,5 @@
 import Box from './box';
+import Photo from './photo';
 import Obstacle from './obstacle';
 import Description from './description';
 import Item, { ItemRecord } from './item';
@@ -8,6 +9,8 @@ class ItemFactory {
         switch (record.type) {
             case 'box':
                 return new Box({ ...record.state });
+            case 'photo':
+                return new Photo({ ...record.state });
             case 'description':
                 return new Description({ ...record.state });
             case 'obstacle':

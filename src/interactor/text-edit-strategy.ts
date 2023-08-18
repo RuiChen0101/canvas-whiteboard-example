@@ -23,7 +23,6 @@ class FreeTextEditStrategy implements TextEditStrategy {
         const size = { w: measureTextWidth(text, item.fontStyle.family, item.fontStyle.size), h: measureTextHeight(text, item.fontStyle.size, item.fontStyle.lineHight) }
         const delta: Point = { x: size.w - item.size.w, y: size.h - item.size.h };
         const rotatedDelta: Point = rotatePoint(delta, ORIGIN, item.rotate);
-        console.log(delta, rotatedDelta);
         const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(item.pos, item.size, item.rotate);
         const rbr = addPoints(bottomRight, rotatedDelta);
         const newCenter = middlePoint(topLeft, rbr);

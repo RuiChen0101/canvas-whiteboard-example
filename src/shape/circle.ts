@@ -37,4 +37,4 @@ class Circle implements Shape {
 }
 
 export default Circle;
-export type { };
+export type { CircleProp };

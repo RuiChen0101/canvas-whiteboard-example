@@ -56,7 +56,7 @@ interface TextEditableItem extends Item {
 abstract class ItemBase<State extends ItemState> extends EventNotifierBase implements Item {
     protected _state: State;
 
-    public get state(): Readonly<any> { return { ...this._state } }
+    public get state(): Readonly<State> { return { ...this._state } }
 
     public get id(): string { return this._state.id; }
     public setId(id: string) { this._state.id = id; }

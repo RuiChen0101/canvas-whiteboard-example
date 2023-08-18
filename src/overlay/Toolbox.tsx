@@ -1,12 +1,13 @@
 import { Component, ReactNode } from 'react';
-import { faSquare } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faImage, faSquare } from '@fortawesome/free-regular-svg-icons';
 import { faArrowPointer, faSquare as faSolidSquare } from '@fortawesome/free-solid-svg-icons';
 
 import './Toolbox.scss';
 
 interface ToolboxProps {
     onToolChange: (toolName: string) => void;
+    onAddImage: () => void;
     currentTool: string;
 }
 
@@ -15,6 +16,9 @@ class Toolbox extends Component<ToolboxProps> {
         return (
             <div className="toolbox-area">
                 <div className="toolbox">
+                    <div className="tool" onClick={this.props.onAddImage}>
+                        <FontAwesomeIcon icon={faImage} />
+                    </div>
                     <div className={`tool${this.props.currentTool === 'select' ? ' active' : ''}`} onClick={() => this.props.onToolChange('select')}>
                         <FontAwesomeIcon icon={faArrowPointer} />
                     </div>
