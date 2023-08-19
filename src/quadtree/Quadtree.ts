@@ -1,5 +1,7 @@
 import type { NodeGeometry, Indexable } from './types';
-import type { Rectangle } from './Rectangle';
+import { Rectangle, RectangleProps } from './Rectangle';
+import { Point } from '../util/point';
+import { Size } from '../util/size';
 
 /**
  * Quadtree Constructor Properties
@@ -197,20 +199,30 @@ export class Quadtree<IdType> {
      * ```typescript
      * const tree = new Quadtree({ width: 100, height: 100 });
      * tree.insert(new Rectangle({ x: 25, y: 25, width: 10, height: 10, data: 'data' }));
-     * tree.insert(new Circle({ x: 25, y: 25, r: 10, data: 512 }));
-     * tree.insert(new Line({ x1: 25, y1: 25, x2: 60, y2: 40, data: { custom: 'property'} }));
      * ```
      * 
      * @param obj - Object to be added.
      */
-    insert(obj: Rectangle<IdType>): void {
+    insert(id: IdType, pos: Point, size: Size, rotate: number): void {
+        const obj = new Rectangle<IdType>({
+            id: id,
+            x: pos.x,
+            y: pos.y,
+            width: size.w,
+            height: size.h,
+            rotate: rotate,
+        });
+        this.remove(id);
+        this._insert(obj);
+    }
 
+    private _insert(obj: Rectangle<IdType>): void {
         //if we have subnodes, call insert on matching subnodes
         if (this.nodes.length) {
             const indexes = this.getIndex(obj);
 
             for (let i = 0; i < indexes.length; i++) {
-                this.nodes[indexes[i]].insert(obj);
+                this.nodes[indexes[i]]._insert(obj);
             }
             return;
         }
@@ -230,7 +242,7 @@ export class Quadtree<IdType> {
             for (let i = 0; i < this.objects.length; i++) {
                 const indexes = this.getIndex(this.objects[i]);
                 for (let k = 0; k < indexes.length; k++) {
-                    this.nodes[indexes[k]].insert(this.objects[i]);
+                    this.nodes[indexes[k]]._insert(this.objects[i]);
                 }
             }
 
@@ -253,15 +265,25 @@ export class Quadtree<IdType> {
      * @param obj - geometry to be checked
      * @returns Array containing all detected objects.
      */
-    retrieve(obj: Rectangle<IdType>): Rectangle<IdType>[] {
+    retrieve(pos: Point, size: Size, rotate: number): Rectangle<IdType>[] {
+        const obj = new Rectangle<IdType>({
+            x: pos.x,
+            y: pos.y,
+            width: size.w,
+            height: size.h,
+            rotate: rotate,
+        });
+        return this._retrieve(obj);
+    }
 
+    private _retrieve(obj: Rectangle<IdType>): Rectangle<IdType>[] {
         const indexes = this.getIndex(obj);
         let returnObjects = this.objects;
 
         //if we have subnodes, retrieve their objects
         if (this.nodes.length) {
             for (let i = 0; i < indexes.length; i++) {
-                returnObjects = returnObjects.concat(this.nodes[indexes[i]].retrieve(obj));
+                returnObjects = returnObjects.concat(this.nodes[indexes[i]]._retrieve(obj));
             }
         }
 
@@ -273,13 +295,20 @@ export class Quadtree<IdType> {
         return returnObjects;
     }
 
-    detectCollision(obj: Rectangle<IdType>): Rectangle<IdType>[] {
-        const objs = this.retrieve(obj);
+    detectCollision(pos: Point, size: Size, rotate: number): Rectangle<IdType>[] {
+        const obj = new Rectangle<IdType>({
+            x: pos.x,
+            y: pos.y,
+            width: size.w,
+            height: size.h,
+            rotate: rotate,
+        });
+        const objs = this._retrieve(obj);
         return objs.filter((o, _) => obj.isCollide(o));
     }
 
     // from https://github.com/jonit-dev/quadtree-ts
-    remove(id: string): void {
+    remove(id: IdType): void {
         // remove on nodes and all nested nodes
         for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].remove(id);
@@ -287,12 +316,6 @@ export class Quadtree<IdType> {
 
         // remove objects
         this.objects = this.objects.filter((o) => o.id !== id);
-    }
-
-    // from https://github.com/jonit-dev/quadtree-ts
-    update(id: string, updatedObject: Rectangle<IdType>): void {
-        this.remove(id);
-        this.insert(updatedObject);
     }
 
     /**

@@ -1,56 +1,58 @@
 import { Size } from '../util/size';
 import { Point } from '../util/point';
+import { Quadtree } from '../quadtree';
 import Visitor from '../visitor/visitor';
-import Item, { ItemEvent } from './item';
 import ItemFactory from './item-factory';
-import { Quadtree, Rectangle } from '../quadtree';
 import ItemPoolMemento from './item-pool-memento';
+import Item, { Collidable, ItemEvent } from './item';
 import { ItemInteractor } from '../interactor/item-interactor';
 import MultiItemInteractor from '../interactor/multi-item-interactor';
 import MementoCaptureVisitor from '../visitor/memento-capture-visitor';
 import SingleItemInteractor from '../interactor/single-item-interactor';
+import BuildSelectQuadtreeVisitor from '../visitor/build-select-quadtree-visitor';
+import BuildCollideQuadtreeVisitor from '../visitor/build-collide-quadtree-visitor';
 
 class ItemPool {
     private _selected?: ItemInteractor;
     private _items: { [key: string]: Item } = {};
-    private _quadtree: Quadtree<string>;
+    private _selectQuadtree: Quadtree<string>;
+    private _collideQuadtree: Quadtree<string>;
 
-    public get selected(): ItemInteractor | undefined {
+    get selected(): ItemInteractor | undefined {
         return this._selected;
     }
 
-    public get items(): Item[] {
+    get items(): Item[] {
         return Object.values(this._items);
     }
 
     constructor(canvasSize: Size) {
-        this._quadtree = new Quadtree<string>({
-            width: canvasSize.w,
-            height: canvasSize.h,
-        });
+        this._selectQuadtree = new Quadtree<string>({ width: canvasSize.w, height: canvasSize.h, });
+        this._collideQuadtree = new Quadtree<string>({ width: canvasSize.w, height: canvasSize.h });
     }
 
     addItem(item: Item): void {
-        item.on(ItemEvent.Reposition, this._onItemUpdate);
-        item.on(ItemEvent.Resize, this._onItemUpdate);
+        item.on(ItemEvent.Update, this._onItemUpdate);
         this._items[item.id] = item;
-        this._quadtree.insert(new Rectangle<string>({
-            x: item.pos.x,
-            y: item.pos.y,
-            width: item.size.w,
-            height: item.size.h,
-            rotate: item.rotate,
-            id: item.id,
-        }));
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._selectQuadtree);
+        const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
+        item.visit(selectVisitor);
+        item.visit(collideVisitor);
+        this._selectQuadtree = selectVisitor.getResult();
+        this._collideQuadtree = collideVisitor.getResult();
     }
 
-    searchItem(pos: Point, size: Size): Item[] {
-        const objs = this._quadtree.detectCollision(new Rectangle<string>({ x: pos.x, y: pos.y, width: size.w, height: size.h, rotate: 0 }));
-        const result: Item[] = [];
-        for (const o of objs) {
-            result.push(this._items[o.id!]);
+    addItems(items: Item[]): void {
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._selectQuadtree);
+        const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
+        for (const item of items) {
+            item.on(ItemEvent.Update, this._onItemUpdate);
+            this._items[item.id] = item;
+            item.visit(selectVisitor);
+            item.visit(collideVisitor);
         }
-        return result;
+        this._selectQuadtree = selectVisitor.getResult();
+        this._collideQuadtree = collideVisitor.getResult();
     }
 
     selectItem(id: string): void {
@@ -59,8 +61,25 @@ class ItemPool {
         }
     }
 
+    selectItems(ids: string[]): void {
+        if (ids.length === 0) return;
+        if (ids.length === 1) {
+            this.selectItem(ids[0]);
+            return;
+        }
+        const items: Item[] = [];
+        for (const id of ids) {
+            items.push(this._items[id]);
+        }
+        this._selected = new MultiItemInteractor(items);
+    }
+
     selectItemByArea(pos: Point, size: Size): void {
-        const items = this.searchItem(pos, size);
+        const objs = this._selectQuadtree.detectCollision(pos, size, 0);
+        const items: Item[] = [];
+        for (const o of objs) {
+            items.push(this._items[o.id!]);
+        }
         if (items.length === 0) {
             this.clearSelect();
         } else if (items.length === 1) {
@@ -70,12 +89,27 @@ class ItemPool {
         }
     }
 
+    searchCollide(pos: Point, size: Size, rotate: number, excludeId?: string): Item[] {
+        const objs = this._collideQuadtree.detectCollision(pos, size, rotate);
+        const items: Item[] = [];
+        for (const o of objs.filter((o, _) => o.id !== excludeId ?? '')) {
+            items.push(this._items[o.id!]);
+        }
+        return items;
+    }
+
+    isCollide(pos: Point, size: Size, rotate: number, excludeId?: string): boolean {
+        const objs = this._collideQuadtree.detectCollision(pos, size, rotate);
+        return objs.filter((o, _) => o.id !== excludeId ?? '').length !== 0;
+    }
+
     deleteSelectedItem(): void {
         if (this._selected === undefined) return;
         for (const i of this._selected.items) {
             this._items[i.id].clear();
             delete this._items[i.id];
-            this._quadtree.remove(i.id);
+            this._selectQuadtree.remove(i.id);
+            this._collideQuadtree.remove(i.id);
         }
         this.clearSelect();
     }
@@ -93,10 +127,11 @@ class ItemPool {
     restore(memento: ItemPoolMemento): void {
         this.clearSelect();
         this._items = {};
-        this._quadtree.clear();
+        this._selectQuadtree.clear();
+        this._collideQuadtree.clear();
         const factory = new ItemFactory();
         for (const r of memento.records) {
-            const item = factory.build(r)
+            const item = factory.build(r);
             this.addItem(item);
         }
     }
@@ -108,20 +143,24 @@ class ItemPool {
     }
 
     private _onItemUpdate = (...argv: any[]): void => {
-        this._updateQuadtree(argv[0]);
+        const id = argv[0];
+        if (!(id in this._items)) return;
+        const item = this._items[id];
+        this._updateQuadtree(item.id);
+        if ('collidable' in item) {
+            (item as unknown as Collidable).setIsCollide(this.isCollide(item.pos, item.size, item.rotate, item.id));
+        }
     }
 
     private _updateQuadtree(id: string): void {
         if (!(id in this._items)) return;
         const item = this._items[id];
-        this._quadtree.update(id, new Rectangle<string>({
-            x: item.pos.x,
-            y: item.pos.y,
-            width: item.size.w,
-            height: item.size.h,
-            rotate: item.rotate,
-            id: item.id,
-        }));
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._selectQuadtree);
+        const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
+        item.visit(selectVisitor);
+        item.visit(collideVisitor);
+        this._selectQuadtree = selectVisitor.getResult();
+        this._collideQuadtree = collideVisitor.getResult();
     }
 }
 

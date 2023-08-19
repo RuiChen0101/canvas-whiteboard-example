@@ -1,7 +1,7 @@
 import { Component, ReactNode } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faImage, faSquare } from '@fortawesome/free-regular-svg-icons';
-import { faArrowPointer, faSquare as faSolidSquare } from '@fortawesome/free-solid-svg-icons';
+import { faArrowPointer, faSquare as faSolidSquare, faTableCells } from '@fortawesome/free-solid-svg-icons';
 
 import './Toolbox.scss';
 
@@ -27,6 +27,9 @@ class Toolbox extends Component<ToolboxProps> {
                     </div>
                     <div className={`tool${this.props.currentTool === 'obstacle-draw' ? ' active' : ''}`} onClick={() => this.props.onToolChange('obstacle-draw')}>
                         <FontAwesomeIcon icon={faSolidSquare} />
+                    </div>
+                    <div className={`tool${this.props.currentTool === 'massive-box-draw' ? ' active' : ''}`} onClick={() => this.props.onToolChange('massive-box-draw')}>
+                        <FontAwesomeIcon icon={faTableCells} />
                     </div>
                 </div>
             </div>

@@ -10,8 +10,7 @@ import EventNotifier, { EventNotifierBase } from '../util/event';
 import { boundingBoxForRotatedRectangle } from '../util/bounding-box';
 
 enum ItemEvent {
-    Resize = 'resize',
-    Reposition = 'reposition'
+    Update = 'update'
 }
 
 interface ItemRecord {
@@ -43,7 +42,13 @@ interface Item extends EventNotifier {
     visit(visitor: Visitor): void;
 }
 
-interface TextEditableItem extends Item {
+interface Collidable {
+    get collidable(): boolean;
+    get isCollide(): boolean;
+    setIsCollide(b: boolean): void;
+}
+
+interface TextEditable {
     get textEditable(): boolean;
     get isEditing(): boolean;
     setIsEditing(b: boolean): void;
@@ -53,33 +58,35 @@ interface TextEditableItem extends Item {
     get textEditStrategy(): TextEditStrategy;
 }
 
+interface TextEditableItem extends Item, TextEditable { }
+
 abstract class ItemBase<State extends ItemState> extends EventNotifierBase implements Item {
     protected _state: State;
 
-    public get state(): Readonly<State> { return { ...this._state } }
+    get state(): Readonly<State> { return { ...this._state } }
 
-    public get id(): string { return this._state.id; }
-    public setId(id: string) { this._state.id = id; }
+    get id(): string { return this._state.id; }
+    setId(id: string) { this._state.id = id; }
 
-    public get pos(): Point { return this._state.pos; }
-    public setPos(pos: Point) {
+    get pos(): Point { return this._state.pos; }
+    setPos(pos: Point) {
         this._state.pos = pos;
-        this._emit(ItemEvent.Reposition, this._state.id);
+        this._emit(ItemEvent.Update, this._state.id);
     }
 
-    public get size(): Size { return this._state.size; }
-    public setSize(size: Size) {
+    get size(): Size { return this._state.size; }
+    setSize(size: Size) {
         this._state.size = size;
-        this._emit(ItemEvent.Resize, this._state.id);
+        this._emit(ItemEvent.Update, this._state.id);
     }
 
-    public get rotate(): number { return this._state.rotate; }
-    public setRotate(value: number) {
+    get rotate(): number { return this._state.rotate; }
+    setRotate(value: number) {
         this._state.rotate = value;
-        this._emit(ItemEvent.Resize, this._state.id);
+        this._emit(ItemEvent.Update, this._state.id);
     }
 
-    public get boundingBox(): [Point, Point] {
+    get boundingBox(): [Point, Point] {
         return boundingBoxForRotatedRectangle(this._state.pos, this._state.size, this._state.rotate);
     }
 
@@ -96,7 +103,7 @@ abstract class ItemBase<State extends ItemState> extends EventNotifierBase imple
 }
 
 export default Item;
-export type { TextEditableItem, ItemRecord, ItemState };
+export type { Collidable, TextEditable, TextEditableItem, ItemRecord, ItemState };
 export {
     ItemBase,
     ItemEvent,

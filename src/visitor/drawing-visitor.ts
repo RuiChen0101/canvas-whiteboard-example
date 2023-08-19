@@ -24,7 +24,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
 
     visitBox(box: Box): void {
         const shapes: Shape[] = [
-            new Rectangle({ pos: box.pos, size: box.size }),
+            new Rectangle({ pos: box.pos, size: box.size, borderColor: box.isCollide ? "#dc3545" : undefined, borderWidth: box.isCollide ? 3 : undefined }),
         ];
         if (!box.isEditing) {
             shapes.push(new Text({ text: box.name, pos: centerPoint(box.pos, box.size), vAlign: 'middle', hAlign: 'center' }));
@@ -38,6 +38,9 @@ class DrawingVisitor extends VisitorBase implements Visitor {
         const shapes: Shape[] = [
             new ImageShape({ pos: photo.pos, size: photo.size, encodedImage: imageData.data })
         ];
+        if (photo.isCollide) {
+            shapes.push(new Rectangle({ pos: photo.pos, size: photo.size, borderColor: "#dc3545", borderWidth: 3 }));
+        }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(photo.pos, photo.size), photo.rotate));
     }
 

@@ -35,15 +35,15 @@ class SingleItemInteractor implements ItemInteractor {
 
     private _stillStatic: boolean = true;
 
-    public get items(): Item[] {
+    get items(): Item[] {
         return [this._item];
     }
 
-    public get isInteracting(): boolean {
+    get isInteracting(): boolean {
         return this._interact !== InteractingType.None;
     }
 
-    public get stillStatic(): boolean {
+    get stillStatic(): boolean {
         return this._stillStatic;
     }
 

@@ -32,15 +32,15 @@ class Canvas extends Component<CanvasProps, CanvasState> {
 
     private _shapes: Shape[] = [];
 
-    public set shapes(s: Shape[]) {
+    set shapes(s: Shape[]) {
         this._shapes = s;
     }
 
-    public set cameraDisable(b: boolean) {
+    set cameraDisable(b: boolean) {
         this._cameraControl!.disabled = b;
     }
 
-    public get cameraState(): CameraState { return this._cameraControl!.state };
+    get cameraState(): CameraState { return this._cameraControl!.state };
 
     constructor(prop: CanvasProps) {
         super(prop);

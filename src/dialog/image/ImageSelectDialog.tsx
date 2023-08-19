@@ -35,7 +35,7 @@ class ImageSelectDialog extends Component<ImageSelectDialogProps, ImageSelectDia
         try {
             const data = await imageUrlToBase64(this.state.url);
             const size = await imageSize(data);
-            console.log(size);
+
             this.props.onSuccess({
                 url: this.state.url,
                 urlHash: sha1(this.state.url).toString(enc),

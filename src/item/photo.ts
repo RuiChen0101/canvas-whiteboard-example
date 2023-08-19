@@ -1,25 +1,38 @@
 import Visitor from '../visitor/visitor';
-import Item, { ItemBase, ItemState } from './item';
+import Item, { Collidable, ItemBase, ItemState } from './item';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
 import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/resize-strategy';
 
-interface PhotoState extends ItemState {
+interface PhotoProps extends ItemState {
     url: string;
 }
 
-class Photo extends ItemBase<PhotoState> implements Item {
-    public get url(): string { return this._state.url; }
+interface PhotoState extends ItemState {
+    url: string;
+    isCollide: boolean;
+}
 
-    public get moveStrategy(): MoveStrategy {
+class Photo extends ItemBase<PhotoState> implements Item, Collidable {
+    get url(): string { return this._state.url; }
+
+    get collidable(): boolean { return true; }
+    get isCollide(): boolean { return this._state.isCollide; }
+    setIsCollide(b: boolean): void { this._state.isCollide = b; }
+
+    constructor(prop: PhotoProps) {
+        super({ ...prop, isCollide: false });
+    }
+
+    get moveStrategy(): MoveStrategy {
         return new FreeMoveStrategy();
     }
 
-    public get resizeStrategy(): ResizeStrategy {
+    get resizeStrategy(): ResizeStrategy {
         return new DiagonalResizeStrategy();
     }
 
-    public get rotateStrategy(): RotateStrategy {
+    get rotateStrategy(): RotateStrategy {
         return new FreeRotateStrategy();
     }
 

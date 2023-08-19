@@ -2,28 +2,30 @@ import Box from './item/box';
 import Canvas from './Canvas';
 import Photo from './item/photo';
 import Random from './util/random';
+import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
 import { ORIGIN, Point } from './util/point';
 import { Size, ZERO_SIZE } from './util/size';
 import SelectionTool from './tool/selection-tool';
+import Spinner from 'react-bootstrap/esm/Spinner';
 import BoxDrawingTool from './tool/box-drawing-tool';
+import { showDialog } from './dialog/base/DialogBase';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import { Component, ReactNode, createRef } from 'react';
 import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
+import MassiveBoxDrawingTool from './tool/massive-box-drawing-tool';
+import ImagePreloader, { ImageData } from './preloader/image-preload';
+import CollectImageUrlVisitor from './visitor/collect-image-url-visitor';
 
 import './App.scss';
 
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
-import Spinner from 'react-bootstrap/esm/Spinner';
-import CollectImageUrlVisitor from './visitor/collect-image-url-visitor';
-import ImagePreloader, { ImageData } from './preloader/image-preload';
-import { showDialog } from './dialog/base/DialogBase';
 import ImageSelectDialog from './dialog/image/ImageSelectDialog';
 
 interface AppState {
@@ -57,7 +59,8 @@ class App extends Component<any, AppState> {
     this._currentTool = new SelectionTool(this._itemPool);
     this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
     this._itemPool.addItem(new Box({ id: '2', name: 'box2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 45 }));
-    this._itemPool.addItem(new Photo({ id: '3', url: `${process.env.PUBLIC_URL}/logo512.png`, size: { w: 128, h: 128 }, pos: { x: 300, y: 300 }, rotate: 0 }))
+    this._itemPool.addItem(new Photo({ id: '3', url: `${process.env.PUBLIC_URL}/logo512.png`, size: { w: 128, h: 128 }, pos: { x: 300, y: 300 }, rotate: 0 }));
+    this._itemPool.addItem(new Obstacle({ id: '4', pos: { x: 100, y: 300 }, size: { w: 100, h: 100 }, rotate: 0 }));
   }
 
   async componentDidMount(): Promise<void> {
@@ -97,7 +100,6 @@ class App extends Component<any, AppState> {
   }
 
   private _addImage = (imageData: ImageData): void => {
-    console.log(imageData);
     this._imageData.set(imageData.urlHash, imageData);
     const pos = { x: (window.innerWidth / 2) - (imageData.size.w / 2), y: (window.innerHeight / 2) - (imageData.size.h / 2) };
     this._itemPool.addItem(new Photo({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(pos), size: imageData.size, rotate: 0, url: imageData.url }));
@@ -236,7 +238,6 @@ class App extends Component<any, AppState> {
   }
 
   private _onToolChange = (toolName: string): void => {
-    this._itemPool.clearSelect();
     switch (toolName) {
       case 'select':
         this._currentTool = new SelectionTool(this._itemPool);
@@ -246,6 +247,7 @@ class App extends Component<any, AppState> {
         });
         break;
       case 'box-draw':
+        this._itemPool.clearSelect();
         this._currentTool = new BoxDrawingTool(this._itemPool);
         this.setState({
           currentTool: toolName,
@@ -253,7 +255,16 @@ class App extends Component<any, AppState> {
         });
         break;
       case 'obstacle-draw':
+        this._itemPool.clearSelect();
         this._currentTool = new ObstacleDrawingTool(this._itemPool);
+        this.setState({
+          currentTool: toolName,
+          cursorType: this._currentTool.cursor
+        });
+        break;
+      case 'massive-box-draw':
+        this._itemPool.clearSelect();
+        this._currentTool = new MassiveBoxDrawingTool(this._itemPool);
         this.setState({
           currentTool: toolName,
           cursorType: this._currentTool.cursor

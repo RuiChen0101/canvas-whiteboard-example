@@ -36,17 +36,17 @@ class CameraControl {
     private _controlled: boolean = false;
     private _disabled: boolean = false;
 
-    public set canvasSize(size: Size) {
+    set canvasSize(size: Size) {
         this._canvasSize = size;
         this._viewSize = scaleSize(size, this._scale);
         this._updateScaleTension();
     }
 
-    public set disabled(b: boolean) {
+    set disabled(b: boolean) {
         this._disabled = b;
     }
 
-    public get state(): CameraState {
+    get state(): CameraState {
         return {
             viewport: this._viewport,
             viewSize: this._viewSize,
@@ -54,7 +54,7 @@ class CameraControl {
         }
     }
 
-    public get controlled(): boolean { return this._controlled; }
+    get controlled(): boolean { return this._controlled; }
 
     constructor(prop: CameraControlProp) {
         this._context = prop.context;

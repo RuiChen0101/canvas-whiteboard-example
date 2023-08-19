@@ -8,15 +8,15 @@ interface ObstacleState extends ItemState { }
 
 class Obstacle extends ItemBase<ObstacleState> {
 
-    public get moveStrategy(): MoveStrategy {
+    get moveStrategy(): MoveStrategy {
         return new FreeMoveStrategy();
     }
 
-    public get resizeStrategy(): ResizeStrategy {
+    get resizeStrategy(): ResizeStrategy {
         return new FreeResizeStrategy();
     }
 
-    public get rotateStrategy(): RotateStrategy {
+    get rotateStrategy(): RotateStrategy {
         return new FreeRotateStrategy();
     }
 

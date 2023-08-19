@@ -31,15 +31,15 @@ class MultiItemInteractor implements ItemInteractor {
 
     private _stillStatic: boolean = true;
 
-    public get items(): Item[] {
+    get items(): Item[] {
         return this._items;
     }
 
-    public get isInteracting(): boolean {
+    get isInteracting(): boolean {
         return this._interact !== InteractingType.None;
     }
 
-    public get stillStatic(): boolean {
+    get stillStatic(): boolean {
         return this._stillStatic;
     }
 
