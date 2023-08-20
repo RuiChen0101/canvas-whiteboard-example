@@ -2,6 +2,7 @@ import Item from '../item/item';
 import Shape from '../shape/shape';
 import { Size } from '../util/size';
 import { Point } from '../util/point';
+import AppContext from '../AppContext';
 import { FontStyle } from '../type/font-style';
 
 enum InteractingType {
@@ -15,7 +16,7 @@ enum InteractingType {
     None
 }
 
-interface InteractorContext {
+interface InteractorInfo {
     topLeft: Point;
     topCenter: Point;
     topRight: Point;
@@ -34,10 +35,10 @@ interface ItemInteractor {
     get stillStatic(): boolean;
     checkInteract(pos: Point, doubleClick: boolean): InteractingType;
     onTextEditStart(): [string, Point, Size, number, FontStyle, string];
-    onTextEdit(text: string): [Point, Size, number];
+    onTextEdit(ctx: AppContext, text: string): [Point, Size, number];
     onTextEditEnd(text: string): void;
     onDragStart(pos: Point): void;
-    onDragMove(pos: Point): void;
+    onDragMove(ctx: AppContext, pos: Point): void
     onDragEnd(pos: Point): void;
     draw(): Shape[]
 }
@@ -45,7 +46,7 @@ interface ItemInteractor {
 // export default ItemInteractor;
 export type {
     ItemInteractor,
-    InteractorContext,
+    InteractorInfo,
 }
 export {
     InteractingType,

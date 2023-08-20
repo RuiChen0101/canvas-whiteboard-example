@@ -1,22 +1,23 @@
 import Shape from '../shape/shape';
 import Circle from '../shape/circle';
 import Rotate from '../shape/rotate';
+import AppContext from '../AppContext';
 import Rectangle from '../shape/rectangle';
 import MoveStrategy from './move-strategy';
 import { Size, ZERO_SIZE } from '../util/size';
 import ResizeStrategy from './resize-strategy';
 import RotateStrategy from './rotate-strategy';
+import { FontStyle } from '../type/font-style';
 import TextEditStrategy from './text-edit-strategy';
 import Item, { TextEditableItem } from '../item/item';
 import { ORIGIN, Point, centerPoint, rotatePoint } from '../util/point';
 import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
-import { ANCHOR_SIZE, InteractingType, InteractorContext, ItemInteractor, PADDING } from './item-interactor';
-import { FontStyle } from '../type/font-style';
+import { ANCHOR_SIZE, InteractingType, InteractorInfo, ItemInteractor, PADDING } from './item-interactor';
 
 class SingleItemInteractor implements ItemInteractor {
     private _item: Item;
 
-    private _context: InteractorContext = {
+    private _info: InteractorInfo = {
         topLeft: ORIGIN,
         topCenter: ORIGIN,
         topRight: ORIGIN,
@@ -34,6 +35,8 @@ class SingleItemInteractor implements ItemInteractor {
     private _interact: InteractingType = InteractingType.None;
 
     private _stillStatic: boolean = true;
+
+    private _invalid: boolean = false;
 
     get items(): Item[] {
         return [this._item];
@@ -56,11 +59,11 @@ class SingleItemInteractor implements ItemInteractor {
     }
 
     checkInteract(pos: Point, doubleClick: boolean = false): InteractingType {
-        const ctx = this._context;
-        const p = { x: ctx.topLeft.x - PADDING, y: ctx.topLeft.y - PADDING };
-        const s = { w: ctx.size.w + (PADDING * 2), h: ctx.size.h + (PADDING * 2) };
+        const info = this._info;
+        const p = { x: info.topLeft.x - PADDING, y: info.topLeft.y - PADDING };
+        const s = { w: info.size.w + (PADDING * 2), h: info.size.h + (PADDING * 2) };
         const [topLeft, topRight, bottomRight, bottomLeft] = fourCornerForRotatedRectangle(p, s, this._item.rotate);
-        const topCenter = rotatePoint({ x: ctx.topCenter.x, y: ctx.topCenter.y - PADDING - 10 }, centerPoint(ctx.topLeft, ctx.size), this._item.rotate);
+        const topCenter = rotatePoint({ x: info.topCenter.x, y: info.topCenter.y - PADDING - 10 }, centerPoint(info.topLeft, info.size), this._item.rotate);
 
         if (topLeft.x - 6 <= pos.x && topLeft.x + 6 >= pos.x && topLeft.y - 6 <= pos.y && topLeft.y + 6 >= pos.y) {
             return InteractingType.TopLeft;
@@ -77,7 +80,7 @@ class SingleItemInteractor implements ItemInteractor {
         if (topCenter.x - 5 <= pos.x && topCenter.x + 5 >= pos.x && topCenter.y - 5 <= pos.y && topCenter.y + 5 >= pos.y) {
             return InteractingType.Rotate;
         }
-        if (isRectangleCollide(ctx.topLeft, ctx.size, this._item.rotate, pos, { w: 1, h: 1 }, 0)) {
+        if (isRectangleCollide(info.topLeft, info.size, this._item.rotate, pos, { w: 1, h: 1 }, 0)) {
             if (doubleClick && 'textEditable' in this._item) {
                 return InteractingType.Text;
             }
@@ -91,21 +94,22 @@ class SingleItemInteractor implements ItemInteractor {
         this._stillStatic = true;
         this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
         this._interact = InteractingType.Text;
-        return this._textEditStrategy.startEdit(this._context, this._item as TextEditableItem);
+        return this._textEditStrategy.startEdit(this._info, this._item as TextEditableItem);
     }
 
-    onTextEdit(text: string): [Point, Size, number] {
+    onTextEdit(ctx: AppContext, text: string): [Point, Size, number] {
         if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
         this._stillStatic = false;
-        const [pos, size, rotate] = this._textEditStrategy.onEdit(this._context, this._item as TextEditableItem, text);
+        const [pos, size, rotate] = this._textEditStrategy.onEdit(this._info, this._item as TextEditableItem, text);
         this._inferPosAndSize();
+        this._checkOutBound(ctx);
         return [pos, size, rotate];
     }
 
     onTextEditEnd(text: string): void {
         if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
         this._stillStatic = false;
-        this._textEditStrategy.endEdit(this._context, this._item as TextEditableItem, text);
+        this._textEditStrategy.endEdit(this._info, this._item as TextEditableItem, text);
         this._interact = InteractingType.None;
         this._inferPosAndSize();
     }
@@ -115,56 +119,58 @@ class SingleItemInteractor implements ItemInteractor {
         if (interact === InteractingType.None) return;
         this._stillStatic = true;
         this._interact = interact;
-        this._context.lastPos = pos;
+        this._info.lastPos = pos;
     }
 
-    onDragMove(pos: Point): void {
+    onDragMove(ctx: AppContext, pos: Point): void {
         if (this._interact === InteractingType.None) return;
         this._stillStatic = false;
         switch (this._interact) {
             case InteractingType.Body:
-                this._moveStrategy.move(this._context, [this._item], pos);
+                this._moveStrategy.move(this._info, [this._item], pos);
                 break;
             case InteractingType.TopLeft:
-                this._resizeStrategy.resizeTopLeft(this._context, [this._item], pos);
+                this._resizeStrategy.resizeTopLeft(this._info, [this._item], pos);
                 break;
             case InteractingType.TopRight:
-                this._resizeStrategy.resizeTopRight(this._context, [this._item], pos);
+                this._resizeStrategy.resizeTopRight(this._info, [this._item], pos);
                 break;
             case InteractingType.BottomLeft:
-                this._resizeStrategy.resizeBottomLeft(this._context, [this._item], pos);
+                this._resizeStrategy.resizeBottomLeft(this._info, [this._item], pos);
                 break;
             case InteractingType.BottomRight:
-                this._resizeStrategy.resizeBottomRight(this._context, [this._item], pos);
+                this._resizeStrategy.resizeBottomRight(this._info, [this._item], pos);
                 break;
             case InteractingType.Rotate:
-                this._rotateStrategy.rotate(this._context, [this._item], pos);
+                this._rotateStrategy.rotate(this._info, [this._item], pos);
                 break;
         }
-        this._context.lastPos = pos;
+        this._info.lastPos = pos;
 
         this._inferPosAndSize();
+        this._checkOutBound(ctx);
     }
 
     onDragEnd(pos: Point): void {
         if (this._interact === InteractingType.None) return;
         this._stillStatic = false;
         this._interact = InteractingType.None;
-        this._context.lastPos = pos;
+        this._info.lastPos = pos;
     }
 
     draw(): Shape[] {
-        const ctx = this._context;
+        const info = this._info;
         const i = this._item;
+        const borderColor: string = this._invalid ? "#dc3545" : "#0d6efd";
         return [
             new Rotate({
                 anchor: centerPoint(i.pos, i.size), rotate: i.rotate, shapes: [
-                    new Rectangle({ pos: { x: ctx.topLeft.x - PADDING, y: ctx.topLeft.y - PADDING }, size: { w: ctx.size.w + (PADDING * 2), h: ctx.size.h + (PADDING * 2) }, borderColor: "#0d6efd" }),
-                    new Rectangle({ pos: { x: ctx.topLeft.x - PADDING - 4, y: ctx.topLeft.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: "#0d6efd", color: "#fff" }),
-                    new Rectangle({ pos: { x: ctx.topRight.x + PADDING - 4, y: ctx.topRight.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: "#0d6efd", color: "#fff" }),
-                    new Rectangle({ pos: { x: ctx.bottomLeft.x - PADDING - 4, y: ctx.bottomLeft.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: "#0d6efd", color: "#fff" }),
-                    new Rectangle({ pos: { x: ctx.bottomRight.x + PADDING - 4, y: ctx.bottomRight.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: "#0d6efd", color: "#fff" }),
-                    new Circle({ pos: { x: ctx.topCenter.x, y: ctx.topCenter.y - PADDING - 10 }, radius: 5, borderColor: "#0d6efd", color: "#fff" })
+                    new Rectangle({ pos: { x: info.topLeft.x - PADDING, y: info.topLeft.y - PADDING }, size: { w: info.size.w + (PADDING * 2), h: info.size.h + (PADDING * 2) }, borderColor: borderColor }),
+                    new Rectangle({ pos: { x: info.topLeft.x - PADDING - 4, y: info.topLeft.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+                    new Rectangle({ pos: { x: info.topRight.x + PADDING - 4, y: info.topRight.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+                    new Rectangle({ pos: { x: info.bottomLeft.x - PADDING - 4, y: info.bottomLeft.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+                    new Rectangle({ pos: { x: info.bottomRight.x + PADDING - 4, y: info.bottomRight.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+                    new Circle({ pos: { x: info.topCenter.x, y: info.topCenter.y - PADDING - 10 }, radius: 5, borderColor: borderColor, color: "#fff" })
                 ]
             })
         ];
@@ -174,12 +180,21 @@ class SingleItemInteractor implements ItemInteractor {
         const p1 = this._item.pos;
         const p2 = { x: this._item.pos.x + this._item.size.w, y: this._item.pos.y + this._item.size.h };
 
-        this._context.topLeft = { x: p1.x, y: p1.y };
-        this._context.topRight = { x: p2.x, y: p1.y };
-        this._context.topCenter = { x: (p1.x + p2.x) / 2, y: p1.y };
-        this._context.bottomLeft = { x: p1.x, y: p2.y };
-        this._context.bottomRight = { x: p2.x, y: p2.y };
-        this._context.size = { ...this._item.size };
+        this._info.topLeft = { x: p1.x, y: p1.y };
+        this._info.topRight = { x: p2.x, y: p1.y };
+        this._info.topCenter = { x: (p1.x + p2.x) / 2, y: p1.y };
+        this._info.bottomLeft = { x: p1.x, y: p2.y };
+        this._info.bottomRight = { x: p2.x, y: p2.y };
+        this._info.size = { ...this._item.size };
+    }
+
+    private _checkOutBound(ctx: AppContext): void {
+        const info = this._info;
+        const p = { x: info.topLeft.x, y: info.topLeft.y };
+        const s = { w: info.size.w, h: info.size.h };
+        const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(p, s, this._item.rotate);
+
+        this._invalid = ctx.editableTopLeftPos.x > topLeft.x || ctx.editableTopLeftPos.y > topLeft.y || ctx.editableBottomRightPos.x < bottomRight.x || ctx.editableBottomRightPos.y < bottomRight.y;
     }
 }
 

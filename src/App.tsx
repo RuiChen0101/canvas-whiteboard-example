@@ -2,6 +2,7 @@ import Box from './item/box';
 import Canvas from './Canvas';
 import Photo from './item/photo';
 import Random from './util/random';
+import AppContext from './AppContext';
 import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
@@ -25,18 +26,19 @@ import './App.scss';
 
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
-import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
 import ImageSelectDialog from './dialog/image/ImageSelectDialog';
+import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
 
 interface AppState {
   isLoading: boolean;
   currentTool: string;
   cursorType: string;
+  ctx: AppContext;
 }
 
 class App extends Component<any, AppState> {
   private _canvasRef = createRef<Canvas>();
-  private _itemPool: ItemPool = new ItemPool({ w: 1920, h: 1080 });
+  private _itemPool: ItemPool;
   private _currentTool: Tool;
   private _historyStack: ItemPoolMemento[] = [];
 
@@ -55,7 +57,18 @@ class App extends Component<any, AppState> {
       isLoading: true,
       currentTool: 'select',
       cursorType: 'default',
+      ctx: {
+        canvasSize: { w: 1920, h: 1080 },
+        editableTopLeftPos: { x: 0, y: 0 },
+        editableBottomRightPos: { x: 1920, y: 1080 },
+        scale: 10,
+        display: {
+          showObstacle: true,
+          showText: true
+        }
+      }
     }
+    this._itemPool = new ItemPool(this.state.ctx.canvasSize);
     this._currentTool = new SelectionTool(this._itemPool);
     this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
     this._itemPool.addItem(new Box({ id: '2', name: 'box2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 45 }));
@@ -170,7 +183,7 @@ class App extends Component<any, AppState> {
   private _onDragMove = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
       if (this._itemPool.selected!.stillStatic) { this._saveItemPool(); }
-      this._itemPool.selected!.onDragMove(canvasPos);
+      this._itemPool.selected!.onDragMove(this.state.ctx, canvasPos);
     } else {
       this._currentTool.onMove(canvasPos);
     }
@@ -210,7 +223,7 @@ class App extends Component<any, AppState> {
     this._textBuffer = text;
     if (this._itemPool.selected !== undefined && this._itemPool.selected.isInteracting) {
       if (this._itemPool.selected!.stillStatic) { this._saveItemPool(); }
-      const [pos, size, rotate] = this._itemPool.selected.onTextEdit(text);
+      const [pos, size, rotate] = this._itemPool.selected.onTextEdit(this.state.ctx, text);
       this._textEditController!.pos = this._canvasRef.current!.toScreenPoint(pos);
       this._textEditController!.size = size;
       this._textEditController!.rotate = rotate;
@@ -296,7 +309,7 @@ class App extends Component<any, AppState> {
         />
         <Canvas
           ref={this._canvasRef}
-          cameraBound={{ w: 1920, h: 1080 }}
+          cameraBound={this.state.ctx.canvasSize}
           onDragStart={this._onDragStart}
           onDragMove={this._onDragMove}
           onDragEnd={this._onDragEnd}

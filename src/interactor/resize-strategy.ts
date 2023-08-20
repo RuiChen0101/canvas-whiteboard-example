@@ -1,18 +1,18 @@
 import Item from '../item/item';
-import { InteractorContext } from './item-interactor';
+import { InteractorInfo } from './item-interactor';
 import { fourCornerForRotatedRectangle } from '../util/bounding-box';
 import { ORIGIN, Point, addPoints, centerPoint, diffPoints, middlePoint, rotatePoint, upScalePoint } from '../util/point';
 
 interface ResizeStrategy {
-    resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void;
-    resizeTopRight(ctx: InteractorContext, items: Item[], pos: Point): void;
-    resizeBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void;
-    resizeBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void;
+    resizeTopLeft(info: InteractorInfo, items: Item[], pos: Point): void;
+    resizeTopRight(info: InteractorInfo, items: Item[], pos: Point): void;
+    resizeBottomLeft(info: InteractorInfo, items: Item[], pos: Point): void;
+    resizeBottomRight(info: InteractorInfo, items: Item[], pos: Point): void;
 }
 
 class FreeResizeStrategy {
-    resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
+    resizeTopLeft(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.lastPos);
         for (const i of items) {
             const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const rtl = addPoints(topLeft, delta);
@@ -26,8 +26,8 @@ class FreeResizeStrategy {
         }
     }
 
-    resizeTopRight(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
+    resizeTopRight(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.lastPos);
         for (const i of items) {
             const [_topLeft, topRight, _bottomRight, bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const rtr = addPoints(topRight, delta);
@@ -41,8 +41,8 @@ class FreeResizeStrategy {
         }
     }
 
-    resizeBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
+    resizeBottomLeft(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.lastPos);
         for (const i of items) {
             const [_topLeft, topRight, _bottomRight, bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const rbl = addPoints(bottomLeft, delta);
@@ -56,8 +56,8 @@ class FreeResizeStrategy {
         }
     }
 
-    resizeBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.lastPos);
+    resizeBottomRight(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.lastPos);
         for (const i of items) {
             const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const rbr = addPoints(bottomRight, delta);
@@ -73,44 +73,44 @@ class FreeResizeStrategy {
 }
 
 class GroupResizeStrategy implements ResizeStrategy {
-    resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.topLeft);
-        const s = (delta.x * (ctx.size.w / ctx.size.h)) <= delta.y ? 1 - (delta.x / ctx.size.w) : 1 - (delta.y / ctx.size.h);
-        const d = { x: ctx.bottomRight.x - (ctx.bottomRight.x * s), y: ctx.bottomRight.y - (ctx.bottomRight.y * s) };
-        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
+    resizeTopLeft(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.topLeft);
+        const s = (delta.x * (info.size.w / info.size.h)) <= delta.y ? 1 - (delta.x / info.size.w) : 1 - (delta.y / info.size.h);
+        const d = { x: info.bottomRight.x - (info.bottomRight.x * s), y: info.bottomRight.y - (info.bottomRight.y * s) };
+        if (info.size.w * s < 5 || info.size.h * s < 5) return;
         for (const i of items) {
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
             i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 
-    resizeTopRight(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.topRight);
-        const s = (delta.x * -(ctx.size.w / ctx.size.h)) <= delta.y ? 1 + (delta.x / ctx.size.w) : 1 - (delta.y / ctx.size.h);
-        const d = { x: ctx.bottomLeft.x - (ctx.bottomLeft.x * s), y: ctx.bottomLeft.y - (ctx.bottomLeft.y * s) };
-        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
+    resizeTopRight(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.topRight);
+        const s = (delta.x * -(info.size.w / info.size.h)) <= delta.y ? 1 + (delta.x / info.size.w) : 1 - (delta.y / info.size.h);
+        const d = { x: info.bottomLeft.x - (info.bottomLeft.x * s), y: info.bottomLeft.y - (info.bottomLeft.y * s) };
+        if (info.size.w * s < 5 || info.size.h * s < 5) return;
         for (const i of items) {
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
             i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 
-    resizeBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.bottomLeft);
-        const s = (delta.x * -(ctx.size.w / ctx.size.h)) > delta.y ? 1 - (delta.x / ctx.size.w) : 1 + (delta.y / ctx.size.h);
-        const d = { x: ctx.topRight.x - (ctx.topRight.x * s), y: ctx.topRight.y - (ctx.topRight.y * s) };
-        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
+    resizeBottomLeft(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.bottomLeft);
+        const s = (delta.x * -(info.size.w / info.size.h)) > delta.y ? 1 - (delta.x / info.size.w) : 1 + (delta.y / info.size.h);
+        const d = { x: info.topRight.x - (info.topRight.x * s), y: info.topRight.y - (info.topRight.y * s) };
+        if (info.size.w * s < 5 || info.size.h * s < 5) return;
         for (const i of items) {
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
             i.setSize({ w: i.size.w * s, h: i.size.h * s });
         }
     }
 
-    resizeBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void {
-        const delta = diffPoints(pos, ctx.bottomRight);
-        const s = (delta.x * (ctx.size.w / ctx.size.h)) > delta.y ? 1 + (delta.x / ctx.size.w) : 1 + (delta.y / ctx.size.h);
-        const d = { x: ctx.topLeft.x - (ctx.topLeft.x * s), y: ctx.topLeft.y - (ctx.topLeft.y * s) };
-        if (ctx.size.w * s < 5 || ctx.size.h * s < 5) return;
+    resizeBottomRight(info: InteractorInfo, items: Item[], pos: Point): void {
+        const delta = diffPoints(pos, info.bottomRight);
+        const s = (delta.x * (info.size.w / info.size.h)) > delta.y ? 1 + (delta.x / info.size.w) : 1 + (delta.y / info.size.h);
+        const d = { x: info.topLeft.x - (info.topLeft.x * s), y: info.topLeft.y - (info.topLeft.y * s) };
+        if (info.size.w * s < 5 || info.size.h * s < 5) return;
         for (const i of items) {
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
             i.setSize({ w: i.size.w * s, h: i.size.h * s });
@@ -120,11 +120,11 @@ class GroupResizeStrategy implements ResizeStrategy {
 
 // currently for single item select only
 class DiagonalResizeStrategy implements ResizeStrategy {
-    resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
+    resizeTopLeft(info: InteractorInfo, items: Item[], pos: Point): void {
         for (const i of items) {
             const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const delta = rotatePoint(diffPoints(pos, topLeft), ORIGIN, -i.rotate);
-            const s = (delta.x * (ctx.size.w / ctx.size.h)) <= delta.y ? 1 - (delta.x / ctx.size.w) : 1 - (delta.y / ctx.size.h);
+            const s = (delta.x * (info.size.w / info.size.h)) <= delta.y ? 1 - (delta.x / info.size.w) : 1 - (delta.y / info.size.h);
             const d = { x: bottomRight.x - (bottomRight.x * s), y: bottomRight.y - (bottomRight.y * s) };
             if (i.size.w * s < 5 || i.size.h * s < 5) return;
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
@@ -132,11 +132,11 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         }
     }
 
-    resizeTopRight(ctx: InteractorContext, items: Item[], pos: Point): void {
+    resizeTopRight(info: InteractorInfo, items: Item[], pos: Point): void {
         for (const i of items) {
             const [_topLeft, topRight, _bottomRight, bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const delta = rotatePoint(diffPoints(pos, topRight), ORIGIN, -i.rotate);
-            const s = (delta.x * -(ctx.size.w / ctx.size.h)) <= delta.y ? 1 + (delta.x / ctx.size.w) : 1 - (delta.y / ctx.size.h);
+            const s = (delta.x * -(info.size.w / info.size.h)) <= delta.y ? 1 + (delta.x / info.size.w) : 1 - (delta.y / info.size.h);
             const d = { x: bottomLeft.x - (bottomLeft.x * s), y: bottomLeft.y - (bottomLeft.y * s) };
             if (i.size.w * s < 5 || i.size.h * s < 5) return;
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
@@ -144,11 +144,11 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         }
     }
 
-    resizeBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void {
+    resizeBottomLeft(info: InteractorInfo, items: Item[], pos: Point): void {
         for (const i of items) {
             const [_topLeft, topRight, _bottomRight, bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const delta = rotatePoint(diffPoints(pos, bottomLeft), ORIGIN, -i.rotate);
-            const s = (delta.x * -(ctx.size.w / ctx.size.h)) > delta.y ? 1 - (delta.x / ctx.size.w) : 1 + (delta.y / ctx.size.h);
+            const s = (delta.x * -(info.size.w / info.size.h)) > delta.y ? 1 - (delta.x / info.size.w) : 1 + (delta.y / info.size.h);
             const d = { x: topRight.x - (topRight.x * s), y: topRight.y - (topRight.y * s) };
             if (i.size.w * s < 5 || i.size.h * s < 5) return;
             i.setPos(addPoints(upScalePoint(i.pos, s), d));
@@ -156,7 +156,7 @@ class DiagonalResizeStrategy implements ResizeStrategy {
         }
     }
 
-    resizeBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void {
+    resizeBottomRight(info: InteractorInfo, items: Item[], pos: Point): void {
         for (const i of items) {
             const [topLeft, _topRight, bottomRight, _bottomLeft] = fourCornerForRotatedRectangle(i.pos, i.size, i.rotate);
             const delta = rotatePoint(diffPoints(pos, bottomRight), ORIGIN, -i.rotate);
@@ -170,10 +170,10 @@ class DiagonalResizeStrategy implements ResizeStrategy {
 }
 
 class NoResizeStrategy implements ResizeStrategy {
-    resizeTopLeft(ctx: InteractorContext, items: Item[], pos: Point): void { }
-    resizeTopRight(ctx: InteractorContext, items: Item[], pos: Point): void { }
-    resizeBottomLeft(ctx: InteractorContext, items: Item[], pos: Point): void { }
-    resizeBottomRight(ctx: InteractorContext, items: Item[], pos: Point): void { }
+    resizeTopLeft(info: InteractorInfo, items: Item[], pos: Point): void { }
+    resizeTopRight(info: InteractorInfo, items: Item[], pos: Point): void { }
+    resizeBottomLeft(info: InteractorInfo, items: Item[], pos: Point): void { }
+    resizeBottomRight(info: InteractorInfo, items: Item[], pos: Point): void { }
 }
 
 export default ResizeStrategy;

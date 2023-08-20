@@ -1,24 +1,24 @@
 import { Size } from '../util/size';
 import { FontStyle } from '../type/font-style';
 import { TextEditableItem } from '../item/item';
-import { InteractorContext } from './item-interactor';
+import { InteractorInfo } from './item-interactor';
 import { fourCornerForRotatedRectangle } from '../util/bounding-box';
 import { measureTextHeight, measureTextWidth } from '../util/font-matric';
 import { ORIGIN, Point, addPoints, middlePoint, rotatePoint } from '../util/point';
 
 interface TextEditStrategy {
-    startEdit(ctx: InteractorContext, item: TextEditableItem): [string, Point, Size, number, FontStyle, string];
-    onEdit(ctx: InteractorContext, item: TextEditableItem, text: string): [Point, Size, number];
-    endEdit(ctx: InteractorContext, item: TextEditableItem, text: string): void;
+    startEdit(info: InteractorInfo, item: TextEditableItem): [string, Point, Size, number, FontStyle, string];
+    onEdit(info: InteractorInfo, item: TextEditableItem, text: string): [Point, Size, number];
+    endEdit(info: InteractorInfo, item: TextEditableItem, text: string): void;
 }
 
 class FreeTextEditStrategy implements TextEditStrategy {
-    startEdit(ctx: InteractorContext, item: TextEditableItem): [string, Point, Size, number, FontStyle, string] {
+    startEdit(info: InteractorInfo, item: TextEditableItem): [string, Point, Size, number, FontStyle, string] {
         item.setIsEditing(true);
         return ['free', item.pos, item.size, item.rotate, item.fontStyle, item.text];
     }
 
-    onEdit(ctx: InteractorContext, item: TextEditableItem, text: string): [Point, Size, number] {
+    onEdit(info: InteractorInfo, item: TextEditableItem, text: string): [Point, Size, number] {
         item.setText(text);
         const size = { w: measureTextWidth(text, item.fontStyle.family, item.fontStyle.size), h: measureTextHeight(text, item.fontStyle.size, item.fontStyle.lineHight) }
         const delta: Point = { x: size.w - item.size.w, y: size.h - item.size.h };
@@ -35,7 +35,7 @@ class FreeTextEditStrategy implements TextEditStrategy {
         return [item.pos, item.size, item.rotate];
     }
 
-    endEdit(ctx: InteractorContext, item: TextEditableItem, text: string): void {
+    endEdit(info: InteractorInfo, item: TextEditableItem, text: string): void {
         item.setIsEditing(false);
         item.setText(text);
         const size = { w: measureTextWidth(text, item.fontStyle.family, item.fontStyle.size), h: measureTextHeight(text, item.fontStyle.size, item.fontStyle.lineHight) }
@@ -54,12 +54,12 @@ class FreeTextEditStrategy implements TextEditStrategy {
 }
 
 class BoundedTextEditStrategy implements TextEditStrategy {
-    startEdit(ctx: InteractorContext, item: TextEditableItem): [string, Point, Size, number, FontStyle, string] {
+    startEdit(info: InteractorInfo, item: TextEditableItem): [string, Point, Size, number, FontStyle, string] {
         item.setIsEditing(true);
         return ['bounded', item.pos, item.size, item.rotate, item.fontStyle, item.text];
     }
 
-    onEdit(ctx: InteractorContext, item: TextEditableItem, text: string): [Point, Size, number] {
+    onEdit(info: InteractorInfo, item: TextEditableItem, text: string): [Point, Size, number] {
         item.setText(text);
         const size = { w: measureTextWidth(text, item.fontStyle.family, item.fontStyle.size) + 8, h: measureTextHeight(text, item.fontStyle.size, item.fontStyle.lineHight) + 8 };
         const delta: Point = { x: size.w - item.size.w, y: size.h - item.size.h };
@@ -79,7 +79,7 @@ class BoundedTextEditStrategy implements TextEditStrategy {
         return [item.pos, item.size, item.rotate];
     }
 
-    endEdit(ctx: InteractorContext, item: TextEditableItem, text: string): void {
+    endEdit(info: InteractorInfo, item: TextEditableItem, text: string): void {
         item.setIsEditing(false);
         item.setText(text);
         const size = { w: measureTextWidth(text, item.fontStyle.family, item.fontStyle.size) + 8, h: measureTextHeight(text, item.fontStyle.size, item.fontStyle.lineHight) + 8 }
