@@ -60,6 +60,7 @@ class FreeTextEditor extends Component<FreeTextEditorProps, FreeTextEditorState>
     }
 
     componentDidMount(): void {
+        document.execCommand('defaultParagraphSeparator', false, 'p');
         this._inputRef.current!.innerHTML = this._convertTextToHtml(this.props.text);
         this._inputRef.current!.focus();
         this._inputRef.current!.addEventListener('wheel', this._onWheel);
@@ -76,7 +77,7 @@ class FreeTextEditor extends Component<FreeTextEditorProps, FreeTextEditorState>
     private _convertTextToHtml = (text: string): string => {
         return text
             .split('\n')
-            .map(l => `<div>${l.replace(/&/gi, '&amp;').replace(/</gi, '&lt;') || '<br />'}</div>`)
+            .map(l => `<p>${l.replace(/&/gi, '&amp;').replace(/</gi, '&lt;') || '<br />'}</p>`)
             .join('');
     }
 

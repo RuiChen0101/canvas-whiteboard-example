@@ -120,8 +120,8 @@ export class Quadtree<IdType> {
     constructor(props: QuadtreeProps, level = 0) {
 
         this.bounds = {
-            x: props.x || 0,
-            y: props.y || 0,
+            x: props.x ?? 0,
+            y: props.y ?? 0,
             width: props.width,
             height: props.height,
         };

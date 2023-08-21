@@ -82,7 +82,7 @@ class MultiItemInteractor implements ItemInteractor {
         throw `cannot edit text when multiple item selected`;
     }
 
-    onTextEditEnd(text: string): void {
+    onTextEditEnd(text: string): boolean {
         throw `cannot edit text when multiple item selected`;
     }
 
@@ -123,11 +123,12 @@ class MultiItemInteractor implements ItemInteractor {
         this._checkOutBound(ctx);
     }
 
-    onDragEnd(pos: Point): void {
-        if (this._interact === InteractingType.None) return;
+    onDragEnd(pos: Point): boolean {
+        if (this._interact === InteractingType.None) return false;
         this._stillStatic = false;
         this._interact = InteractingType.None;
         this._info.lastPos = pos;
+        return this._invalid;
     }
 
     draw(): Shape[] {

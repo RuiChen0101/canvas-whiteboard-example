@@ -2,16 +2,19 @@ import Tool from './tool';
 import Box from '../item/box';
 import Shape from '../shape/shape';
 import Random from '../util/random';
+import AppContext from '../AppContext';
 import ItemPool from '../item/item-pool';
 import Rectangle from '../shape/rectangle';
-import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
 import DrawingVisitor from '../visitor/drawing-visitor';
+import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
 
 class MassiveBoxDrawingTool implements Tool {
     private _startPos: Point = ORIGIN;
     private _endPos: Point = ORIGIN;
     private _activate: boolean = false;
     private _random: Random = new Random();
+
+    private _ctx: AppContext;
 
     private _itemPool: ItemPool;
 
@@ -23,7 +26,8 @@ class MassiveBoxDrawingTool implements Tool {
         return false;
     }
 
-    constructor(itemPool: ItemPool) {
+    constructor(ctx: AppContext, itemPool: ItemPool) {
+        this._ctx = ctx;
         this._itemPool = itemPool;
     }
 
@@ -45,7 +49,7 @@ class MassiveBoxDrawingTool implements Tool {
         const validBox: Box[] = [];
         const validIds: string[] = [];
         for (const b of box) {
-            if (this._itemPool.isCollide(b.pos, b.size, b.rotate)) continue;
+            if (this._itemPool.isCollide(b.pos, b.size, b.rotate) || this._checkOutBound(b)) continue;
             validBox.push(b);
             validIds.push(b.id);
         }
@@ -59,7 +63,9 @@ class MassiveBoxDrawingTool implements Tool {
         const box = this._populateBox();
         const visitor = new DrawingVisitor(new Map());
         for (const b of box) {
-            b.setIsCollide(this._itemPool.isCollide(b.pos, b.size, b.rotate));
+            if (this._itemPool.isCollide(b.pos, b.size, b.rotate) || this._checkOutBound(b)) {
+                b.setIsCollide(true);
+            }
             b.visit(visitor);
         }
         return [
@@ -80,6 +86,11 @@ class MassiveBoxDrawingTool implements Tool {
             }
         }
         return box;
+    }
+
+    private _checkOutBound(box: Box): boolean {
+        const bottomRight = { x: box.pos.x + box.size.w, y: box.pos.y + box.size.h };
+        return this._ctx.editableTopLeftPos.x > box.pos.x || this._ctx.editableTopLeftPos.y > box.pos.y || this._ctx.editableBottomRightPos.x < bottomRight.x || this._ctx.editableBottomRightPos.y < bottomRight.y;
     }
 }
 

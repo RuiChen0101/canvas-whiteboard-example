@@ -106,12 +106,13 @@ class SingleItemInteractor implements ItemInteractor {
         return [pos, size, rotate];
     }
 
-    onTextEditEnd(text: string): void {
+    onTextEditEnd(text: string): boolean {
         if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
         this._stillStatic = false;
         this._textEditStrategy.endEdit(this._info, this._item as TextEditableItem, text);
         this._interact = InteractingType.None;
         this._inferPosAndSize();
+        return this._invalid;
     }
 
     onDragStart(pos: Point): void {
@@ -151,11 +152,12 @@ class SingleItemInteractor implements ItemInteractor {
         this._checkOutBound(ctx);
     }
 
-    onDragEnd(pos: Point): void {
-        if (this._interact === InteractingType.None) return;
+    onDragEnd(pos: Point): boolean {
+        if (this._interact === InteractingType.None) return false;
         this._stillStatic = false;
         this._interact = InteractingType.None;
         this._info.lastPos = pos;
+        return this._invalid;
     }
 
     draw(): Shape[] {

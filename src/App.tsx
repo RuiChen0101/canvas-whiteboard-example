@@ -148,7 +148,8 @@ class App extends Component<any, AppState> {
   private _onDragStart = (windowPos: Point, canvasPos: Point): void => {
     if (this._isTextEditing) {
       if (this._itemPool.selected !== undefined && this._itemPool.selected.isInteracting) {
-        this._itemPool.selected!.onTextEditEnd(this._textBuffer);
+        const invalid = this._itemPool.selected!.onTextEditEnd(this._textBuffer);
+        if (invalid) this._restoreItemPool();
       } else if (this._textBuffer !== '') {
         this._saveItemPool();
         this._itemPool.addItem(new Description({ id: this._random.nanoid8(), pos: this._canvasRef.current!.toCanvasPoint(this._editorPos), text: this._textBuffer, rotate: 0 }));
@@ -169,7 +170,8 @@ class App extends Component<any, AppState> {
 
   private _onDragEnd = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected?.isInteracting ?? false) {
-      this._itemPool.selected!.onDragEnd(canvasPos);
+      const invalid = this._itemPool.selected!.onDragEnd(canvasPos);
+      if (invalid) this._restoreItemPool();
     } else {
       if (!this._currentTool.isStatic) this._saveItemPool();
       this._currentTool.onEnd(canvasPos);
@@ -261,7 +263,7 @@ class App extends Component<any, AppState> {
         break;
       case 'box-draw':
         this._itemPool.clearSelect();
-        this._currentTool = new BoxDrawingTool(this._itemPool);
+        this._currentTool = new BoxDrawingTool(this.state.ctx, this._itemPool);
         this.setState({
           currentTool: toolName,
           cursorType: this._currentTool.cursor
@@ -269,7 +271,7 @@ class App extends Component<any, AppState> {
         break;
       case 'obstacle-draw':
         this._itemPool.clearSelect();
-        this._currentTool = new ObstacleDrawingTool(this._itemPool);
+        this._currentTool = new ObstacleDrawingTool(this.state.ctx, this._itemPool);
         this.setState({
           currentTool: toolName,
           cursorType: this._currentTool.cursor
@@ -277,7 +279,7 @@ class App extends Component<any, AppState> {
         break;
       case 'massive-box-draw':
         this._itemPool.clearSelect();
-        this._currentTool = new MassiveBoxDrawingTool(this._itemPool);
+        this._currentTool = new MassiveBoxDrawingTool(this.state.ctx, this._itemPool);
         this.setState({
           currentTool: toolName,
           cursorType: this._currentTool.cursor

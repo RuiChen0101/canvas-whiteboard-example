@@ -36,10 +36,10 @@ interface ItemInteractor {
     checkInteract(pos: Point, doubleClick: boolean): InteractingType;
     onTextEditStart(): [string, Point, Size, number, FontStyle, string];
     onTextEdit(ctx: AppContext, text: string): [Point, Size, number];
-    onTextEditEnd(text: string): void;
+    onTextEditEnd(text: string): boolean;
     onDragStart(pos: Point): void;
     onDragMove(ctx: AppContext, pos: Point): void
-    onDragEnd(pos: Point): void;
+    onDragEnd(pos: Point): boolean;
     draw(): Shape[]
 }
 
