@@ -107,17 +107,7 @@ class Canvas extends Component<CanvasProps, CanvasState> {
 
         this._cameraControl!.outBoundCorrection();
 
-        const shapes: Shape[] = [
-            new Rectangle({ pos: { x: 0, y: 0 }, size: { w: 10, h: 10 } }),
-            new Rectangle({ pos: { x: 1910, y: 0 }, size: { w: 10, h: 10 } }),
-            new Rectangle({ pos: { x: 0, y: 1070 }, size: { w: 10, h: 10 } }),
-            new Rectangle({ pos: { x: 1910, y: 1070 }, size: { w: 10, h: 10 } }),
-            new Rectangle({ pos: { x: 950, y: 530 }, size: { w: 10, h: 10 } }),
-            new Rectangle({ pos: { x: 0, y: 0 }, size: { w: 1920, h: 1080 } }),
-            ...this._shapes
-        ];
-
-        for (const s of shapes) {
+        for (const s of this._shapes) {
             s.draw(canvas, context);
         }
     }

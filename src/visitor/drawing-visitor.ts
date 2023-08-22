@@ -7,6 +7,7 @@ import enc from 'crypto-js/enc-hex';
 import Rotate from '../shape/rotate';
 import Obstacle from '../item/obstacle';
 import Rectangle from '../shape/rectangle';
+import { DisplayFlag } from '../AppContext';
 import ImageShape from '../shape/image-shape';
 import Description from '../item/description';
 import Visitor, { VisitorBase } from './visitor';
@@ -17,8 +18,11 @@ class DrawingVisitor extends VisitorBase implements Visitor {
     private _shapes: Shape[] = [];
     private _imageData: Map<string, ImageData>;
 
-    constructor(ImageData: Map<string, ImageData>) {
+    private _display: DisplayFlag;
+
+    constructor(display: DisplayFlag, ImageData: Map<string, ImageData>) {
         super();
+        this._display = display;
         this._imageData = ImageData;
     }
 
@@ -26,7 +30,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
         const shapes: Shape[] = [
             new Rectangle({ pos: box.pos, size: box.size, borderColor: box.isCollide ? "#dc3545" : undefined, borderWidth: box.isCollide ? 3 : undefined }),
         ];
-        if (!box.isEditing) {
+        if (!box.isEditing && this._display.showText) {
             shapes.push(new Text({ text: box.name, pos: centerPoint(box.pos, box.size), vAlign: 'middle', hAlign: 'center' }));
         }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(box.pos, box.size), box.rotate));
@@ -45,6 +49,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
     }
 
     visitDescription(description: Description): void {
+        if (!this._display.showText) return;
         const shapes: Shape[] = [];
         if (!description.isEditing) {
             shapes.push(new Text({
@@ -59,6 +64,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
     }
 
     visitObstacle(obstacle: Obstacle): void {
+        if (!this._display.showObstacle) return;
         const shapes: Shape[] = [
             new Rectangle({ pos: obstacle.pos, size: obstacle.size, color: "#000" }),
         ];

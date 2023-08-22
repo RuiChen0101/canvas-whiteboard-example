@@ -2,7 +2,7 @@ import Tool from './tool';
 import Box from '../item/box';
 import Shape from '../shape/shape';
 import Random from '../util/random';
-import AppContext from '../AppContext';
+import AppContext, { DEFAULT_DISPLAY } from '../AppContext';
 import ItemPool from '../item/item-pool';
 import Rectangle from '../shape/rectangle';
 import DrawingVisitor from '../visitor/drawing-visitor';
@@ -61,7 +61,7 @@ class MassiveBoxDrawingTool implements Tool {
         if (!this._activate) return [];
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
         const box = this._populateBox();
-        const visitor = new DrawingVisitor(new Map());
+        const visitor = new DrawingVisitor(DEFAULT_DISPLAY, new Map());
         for (const b of box) {
             if (this._itemPool.isCollide(b.pos, b.size, b.rotate) || this._checkOutBound(b)) {
                 b.setIsCollide(true);

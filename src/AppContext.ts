@@ -1,8 +1,17 @@
 import { Point } from './util/point';
 import { Size } from './util/size';
 
+const DEFAULT_DISPLAY: DisplayFlag = {
+    showEditableArea: true,
+    showObstacle: true,
+    showSize: false,
+    showText: true
+};
+
 interface DisplayFlag {
+    showEditableArea: boolean;
     showObstacle: boolean;
+    showSize: boolean;
     showText: boolean;
 }
 
@@ -15,3 +24,7 @@ interface AppContext {
 }
 
 export default AppContext;
+export type { DisplayFlag };
+export {
+    DEFAULT_DISPLAY
+}

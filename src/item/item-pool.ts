@@ -3,6 +3,7 @@ import { Point } from '../util/point';
 import { Quadtree } from '../quadtree';
 import Visitor from '../visitor/visitor';
 import ItemFactory from './item-factory';
+import { DisplayFlag } from '../AppContext';
 import ItemPoolMemento from './item-pool-memento';
 import Item, { Collidable, ItemEvent } from './item';
 import { ItemInteractor } from '../interactor/item-interactor';
@@ -18,6 +19,8 @@ class ItemPool {
     private _selectQuadtree: Quadtree<string>;
     private _collideQuadtree: Quadtree<string>;
 
+    private _display: DisplayFlag;
+
     get selected(): ItemInteractor | undefined {
         return this._selected;
     }
@@ -26,7 +29,8 @@ class ItemPool {
         return Object.values(this._items);
     }
 
-    constructor(canvasSize: Size) {
+    constructor(display: DisplayFlag, canvasSize: Size) {
+        this._display = display;
         this._selectQuadtree = new Quadtree<string>({ width: canvasSize.w, height: canvasSize.h, });
         this._collideQuadtree = new Quadtree<string>({ width: canvasSize.w, height: canvasSize.h });
     }
@@ -34,7 +38,7 @@ class ItemPool {
     addItem(item: Item): void {
         item.on(ItemEvent.Update, this._onItemUpdate);
         this._items[item.id] = item;
-        const selectVisitor = new BuildSelectQuadtreeVisitor(this._selectQuadtree);
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._display, this._selectQuadtree);
         const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
         item.visit(selectVisitor);
         item.visit(collideVisitor);
@@ -43,7 +47,7 @@ class ItemPool {
     }
 
     addItems(items: Item[]): void {
-        const selectVisitor = new BuildSelectQuadtreeVisitor(this._selectQuadtree);
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._display, this._selectQuadtree);
         const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
         for (const item of items) {
             item.on(ItemEvent.Update, this._onItemUpdate);
@@ -136,6 +140,13 @@ class ItemPool {
         }
     }
 
+    updateDisplayFlag(display: DisplayFlag) {
+        this._selectQuadtree.clear();
+        const selectVisitor = new BuildSelectQuadtreeVisitor(display, this._selectQuadtree);
+        this.visit(selectVisitor);
+        this._selectQuadtree = selectVisitor.getResult();
+    }
+
     visit(visitor: Visitor): void {
         for (const [_, i] of Object.entries(this._items)) {
             i.visit(visitor);
@@ -155,7 +166,7 @@ class ItemPool {
     private _updateQuadtree(id: string): void {
         if (!(id in this._items)) return;
         const item = this._items[id];
-        const selectVisitor = new BuildSelectQuadtreeVisitor(this._selectQuadtree);
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._display, this._selectQuadtree);
         const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
         item.visit(selectVisitor);
         item.visit(collideVisitor);

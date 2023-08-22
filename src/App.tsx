@@ -2,7 +2,7 @@ import Box from './item/box';
 import Canvas from './Canvas';
 import Photo from './item/photo';
 import Random from './util/random';
-import AppContext from './AppContext';
+import AppContext, { DEFAULT_DISPLAY } from './AppContext';
 import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
@@ -20,12 +20,14 @@ import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
 import MassiveBoxDrawingTool from './tool/massive-box-drawing-tool';
 import ImagePreloader, { ImageData } from './preloader/image-preload';
+import EditableAreaIndicator from './indicator/editable-area-indicator';
 import CollectImageUrlVisitor from './visitor/collect-image-url-visitor';
 
 import './App.scss';
 
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
+import Setting from './overlay/Setting';
 import ImageSelectDialog from './dialog/image/ImageSelectDialog';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
 
@@ -59,21 +61,18 @@ class App extends Component<any, AppState> {
       cursorType: 'default',
       ctx: {
         canvasSize: { w: 1920, h: 1080 },
-        editableTopLeftPos: { x: 0, y: 0 },
-        editableBottomRightPos: { x: 1920, y: 1080 },
+        editableTopLeftPos: { x: 320, y: 180 },
+        editableBottomRightPos: { x: 1600, y: 900 },
         scale: 10,
-        display: {
-          showObstacle: true,
-          showText: true
-        }
+        display: DEFAULT_DISPLAY
       }
     }
-    this._itemPool = new ItemPool(this.state.ctx.canvasSize);
+    this._itemPool = new ItemPool(this.state.ctx.display, this.state.ctx.canvasSize);
     this._currentTool = new SelectionTool(this._itemPool);
-    this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 100, y: 100 }, rotate: 0 }));
-    this._itemPool.addItem(new Box({ id: '2', name: 'box2', pos: { x: 300, y: 100 }, size: { w: 200, h: 100 }, rotate: 45 }));
-    this._itemPool.addItem(new Photo({ id: '3', url: `${process.env.PUBLIC_URL}/logo512.png`, size: { w: 128, h: 128 }, pos: { x: 300, y: 300 }, rotate: 0 }));
-    this._itemPool.addItem(new Obstacle({ id: '4', pos: { x: 100, y: 300 }, size: { w: 100, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 400, y: 300 }, rotate: 0 }));
+    this._itemPool.addItem(new Box({ id: '2', name: 'box2', pos: { x: 500, y: 300 }, size: { w: 200, h: 100 }, rotate: 45 }));
+    this._itemPool.addItem(new Photo({ id: '3', url: `${process.env.PUBLIC_URL}/logo512.png`, size: { w: 128, h: 128 }, pos: { x: 600, y: 500 }, rotate: 0 }));
+    this._itemPool.addItem(new Obstacle({ id: '4', pos: { x: 400, y: 500 }, size: { w: 100, h: 100 }, rotate: 0 }));
   }
 
   async componentDidMount(): Promise<void> {
@@ -92,9 +91,12 @@ class App extends Component<any, AppState> {
   }
 
   private _updateCanvas = (): void => {
-    const drawVisitor = new DrawingVisitor(this._imageData);
+    const drawVisitor = new DrawingVisitor(this.state.ctx.display, this._imageData);
     this._itemPool.visit(drawVisitor);
     const shapes = drawVisitor.getResult();
+    if (this.state.ctx.display.showEditableArea) {
+      shapes.push(...(new EditableAreaIndicator(this.state.ctx.editableTopLeftPos, this.state.ctx.editableBottomRightPos).draw()));
+    }
     shapes.push(...this._currentTool.draw());
     shapes.push(...(this._itemPool.selected?.draw() ?? []));
     this._canvasRef.current!.shapes = drawVisitor.getResult();
@@ -175,10 +177,8 @@ class App extends Component<any, AppState> {
     } else {
       if (!this._currentTool.isStatic) this._saveItemPool();
       this._currentTool.onEnd(canvasPos);
-      if (this.state.currentTool !== 'select') {
-        this._onToolChange('select');
-      }
     }
+    this._onToolChange('select');
     this._updateCanvas();
   }
 
@@ -292,6 +292,16 @@ class App extends Component<any, AppState> {
     this._updateCanvas();
   }
 
+  private _onSettingChange = (name: string, enable: boolean): void => {
+    const ctx = this.state.ctx;
+    (ctx.display as any)[name] = enable;
+    this.setState({
+      ctx: ctx,
+    });
+    this._itemPool.updateDisplayFlag(this.state.ctx.display);
+    this._updateCanvas();
+  }
+
   private _showImageSelectDialog = (): void => {
     showDialog((close: () => void): ReactNode => {
       return (<ImageSelectDialog onClose={close} onSuccess={this._addImage} />)
@@ -308,6 +318,10 @@ class App extends Component<any, AppState> {
           onAddImage={this._showImageSelectDialog}
           currentTool={this.state.currentTool}
           onToolChange={this._onToolChange}
+        />
+        <Setting
+          displayFlag={this.state.ctx.display}
+          onSettingChange={this._onSettingChange}
         />
         <Canvas
           ref={this._canvasRef}

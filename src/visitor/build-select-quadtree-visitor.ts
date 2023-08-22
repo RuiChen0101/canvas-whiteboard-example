@@ -1,15 +1,18 @@
 import Box from '../item/box';
-import Description from '../item/description';
-import Obstacle from '../item/obstacle';
 import Photo from '../item/photo';
-import { Quadtree, Rectangle } from '../quadtree';
+import { Quadtree } from '../quadtree';
+import Obstacle from '../item/obstacle';
+import { DisplayFlag } from '../AppContext';
+import Description from '../item/description';
 import Visitor, { VisitorBase } from './visitor';
 
 class BuildSelectQuadtreeVisitor extends VisitorBase implements Visitor {
+    private _display: DisplayFlag;
     private _quadtree: Quadtree<string>;
 
-    constructor(quadtree: Quadtree<string>) {
+    constructor(display: DisplayFlag, quadtree: Quadtree<string>) {
         super();
+        this._display = display;
         this._quadtree = quadtree;
     }
 
@@ -18,10 +21,12 @@ class BuildSelectQuadtreeVisitor extends VisitorBase implements Visitor {
     }
 
     visitDescription(description: Description): void {
+        if (!this._display.showText) return;
         this._quadtree.insert(description.id, description.pos, description.size, description.rotate);
     }
 
     visitObstacle(obstacle: Obstacle): void {
+        if (!this._display.showObstacle) return;
         this._quadtree.insert(obstacle.id, obstacle.pos, obstacle.size, obstacle.rotate);
     }
 
