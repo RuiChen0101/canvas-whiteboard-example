@@ -2,14 +2,15 @@ import Tool from './tool';
 import Box from '../item/box';
 import Shape from '../shape/shape';
 import Random from '../util/random';
+import AppContext from '../AppContext';
 import ItemPool from '../item/item-pool';
 import Rectangle from '../shape/rectangle';
+import SizeIndicator from '../indicator/size-indicator';
 import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
-import AppContext from '../AppContext';
 
 class BoxDrawingTool implements Tool {
-    private _startPos: Point = ORIGIN;
     private _endPos: Point = ORIGIN;
+    private _startPos: Point = ORIGIN;
     private _activate: boolean = false;
     private _random: Random = new Random();
 
@@ -56,6 +57,7 @@ class BoxDrawingTool implements Tool {
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
         const color: string | undefined = this._checkOutBound() ? "#dc3545" : undefined;
         return [
+            ...(new SizeIndicator(topLeft, size).draw()),
             new Rectangle({ pos: topLeft, size: size, borderColor: color })
         ];
     }

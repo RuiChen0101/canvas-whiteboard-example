@@ -4,6 +4,7 @@ import Item, { Collidable, ItemBase, ItemState, TextEditable } from './item';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
 import ResizeStrategy, { FreeResizeStrategy } from '../interactor/resize-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
+import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/indicator-strategy';
 import TextEditStrategy, { BoundedTextEditStrategy } from '../interactor/text-edit-strategy';
 
 interface BoxProps extends ItemState {
@@ -51,6 +52,10 @@ class Box extends ItemBase<BoxState> implements Item, TextEditable, Collidable {
 
     get textEditStrategy(): TextEditStrategy {
         return new BoundedTextEditStrategy();
+    }
+
+    get indicatorStrategy(): IndicatorStrategy {
+        return new SizeIndicatorStrategy();
     }
 
     constructor(props: BoxProps);

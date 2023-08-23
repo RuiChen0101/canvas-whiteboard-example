@@ -2,7 +2,6 @@ import Box from './item/box';
 import Canvas from './Canvas';
 import Photo from './item/photo';
 import Random from './util/random';
-import AppContext, { DEFAULT_DISPLAY } from './AppContext';
 import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
 import Description from './item/description';
@@ -15,6 +14,7 @@ import { showDialog } from './dialog/base/DialogBase';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import { Component, ReactNode, createRef } from 'react';
+import AppContext, { DEFAULT_DISPLAY } from './AppContext';
 import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
@@ -30,6 +30,7 @@ import Toolbox from './overlay/Toolbox';
 import Setting from './overlay/Setting';
 import ImageSelectDialog from './dialog/image/ImageSelectDialog';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
+import MeasureTool from './tool/measure-tool';
 
 interface AppState {
   isLoading: boolean;
@@ -63,8 +64,12 @@ class App extends Component<any, AppState> {
         canvasSize: { w: 1920, h: 1080 },
         editableTopLeftPos: { x: 320, y: 180 },
         editableBottomRightPos: { x: 1600, y: 900 },
-        scale: 10,
-        display: DEFAULT_DISPLAY
+        display: {
+          showEditableArea: true,
+          showObstacle: true,
+          showSize: false,
+          showText: true
+        }
       }
     }
     this._itemPool = new ItemPool(this.state.ctx.display, this.state.ctx.canvasSize);
@@ -280,6 +285,14 @@ class App extends Component<any, AppState> {
       case 'massive-box-draw':
         this._itemPool.clearSelect();
         this._currentTool = new MassiveBoxDrawingTool(this.state.ctx, this._itemPool);
+        this.setState({
+          currentTool: toolName,
+          cursorType: this._currentTool.cursor
+        });
+        break;
+      case 'ruler':
+        this._itemPool.clearSelect();
+        this._currentTool = new MeasureTool();
         this.setState({
           currentTool: toolName,
           cursorType: this._currentTool.cursor

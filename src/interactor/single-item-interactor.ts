@@ -13,6 +13,7 @@ import Item, { TextEditableItem } from '../item/item';
 import { ORIGIN, Point, centerPoint, rotatePoint } from '../util/point';
 import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 import { ANCHOR_SIZE, InteractingType, InteractorInfo, ItemInteractor, PADDING } from './item-interactor';
+import IndicatorStrategy from './indicator-strategy';
 
 class SingleItemInteractor implements ItemInteractor {
     private _item: Item;
@@ -27,10 +28,11 @@ class SingleItemInteractor implements ItemInteractor {
         lastPos: ORIGIN,
     };
 
-    private _textEditStrategy?: TextEditStrategy;
+    private _moveStrategy: MoveStrategy;
     private _resizeStrategy: ResizeStrategy;
     private _rotateStrategy: RotateStrategy;
-    private _moveStrategy: MoveStrategy;
+    private _textEditStrategy?: TextEditStrategy;
+    private _indicatorStrategy: IndicatorStrategy;
 
     private _interact: InteractingType = InteractingType.None;
 
@@ -52,9 +54,13 @@ class SingleItemInteractor implements ItemInteractor {
 
     constructor(item: Item) {
         this._item = item;
+        this._moveStrategy = item.moveStrategy;
         this._resizeStrategy = item.resizeStrategy;
         this._rotateStrategy = item.rotateStrategy;
-        this._moveStrategy = item.moveStrategy;
+        this._indicatorStrategy = item.indicatorStrategy;
+        if (!('textEditable' in this._item)) {
+            this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
+        }
         this._inferPosAndSize();
     }
 
@@ -81,7 +87,7 @@ class SingleItemInteractor implements ItemInteractor {
             return InteractingType.Rotate;
         }
         if (isRectangleCollide(info.topLeft, info.size, this._item.rotate, pos, { w: 1, h: 1 }, 0)) {
-            if (doubleClick && 'textEditable' in this._item) {
+            if (doubleClick && this._textEditStrategy !== undefined) {
                 return InteractingType.Text;
             }
             return InteractingType.Body;
@@ -90,15 +96,14 @@ class SingleItemInteractor implements ItemInteractor {
     }
 
     onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
-        if (!('textEditable' in this._item)) throw 'selected item dose not support text edit';
+        if (this._textEditStrategy === undefined) throw 'selected item dose not support text edit';
         this._stillStatic = true;
-        this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
         this._interact = InteractingType.Text;
         return this._textEditStrategy.startEdit(this._info, this._item as TextEditableItem);
     }
 
     onTextEdit(ctx: AppContext, text: string): [Point, Size, number] {
-        if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
+        if (this._textEditStrategy === undefined) throw 'selected item dose not support text edit';
         this._stillStatic = false;
         const [pos, size, rotate] = this._textEditStrategy.onEdit(this._info, this._item as TextEditableItem, text);
         this._inferPosAndSize();
@@ -107,7 +112,7 @@ class SingleItemInteractor implements ItemInteractor {
     }
 
     onTextEditEnd(text: string): boolean {
-        if (this._textEditStrategy === undefined) throw 'text editing flow dose not initialize correctly';
+        if (this._textEditStrategy === undefined) throw 'selected item dose not support text edit';
         this._stillStatic = false;
         this._textEditStrategy.endEdit(this._info, this._item as TextEditableItem, text);
         this._interact = InteractingType.None;
@@ -167,6 +172,7 @@ class SingleItemInteractor implements ItemInteractor {
         return [
             new Rotate({
                 anchor: centerPoint(i.pos, i.size), rotate: i.rotate, shapes: [
+                    ...(this._indicatorStrategy.draw(info, [this._item])),
                     new Rectangle({ pos: { x: info.topLeft.x - PADDING, y: info.topLeft.y - PADDING }, size: { w: info.size.w + (PADDING * 2), h: info.size.h + (PADDING * 2) }, borderColor: borderColor }),
                     new Rectangle({ pos: { x: info.topLeft.x - PADDING - 4, y: info.topLeft.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
                     new Rectangle({ pos: { x: info.topRight.x + PADDING - 4, y: info.topRight.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),

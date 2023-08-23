@@ -13,6 +13,7 @@ import Description from '../item/description';
 import Visitor, { VisitorBase } from './visitor';
 import { Point, centerPoint } from '../util/point';
 import { ImageData } from '../preloader/image-preload';
+import SizeIndicator from '../indicator/size-indicator';
 
 class DrawingVisitor extends VisitorBase implements Visitor {
     private _shapes: Shape[] = [];
@@ -32,6 +33,9 @@ class DrawingVisitor extends VisitorBase implements Visitor {
         ];
         if (!box.isEditing && this._display.showText) {
             shapes.push(new Text({ text: box.name, pos: centerPoint(box.pos, box.size), vAlign: 'middle', hAlign: 'center' }));
+        }
+        if (this._display.showSize) {
+            shapes.push(...(new SizeIndicator(box.pos, box.size).draw()));
         }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(box.pos, box.size), box.rotate));
     }
@@ -68,6 +72,9 @@ class DrawingVisitor extends VisitorBase implements Visitor {
         const shapes: Shape[] = [
             new Rectangle({ pos: obstacle.pos, size: obstacle.size, color: "#000" }),
         ];
+        if (this._display.showSize) {
+            shapes.push(...(new SizeIndicator(obstacle.pos, obstacle.size).draw()));
+        }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(obstacle.pos, obstacle.size), obstacle.rotate));
     }
 

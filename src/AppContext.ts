@@ -1,12 +1,12 @@
 import { Point } from './util/point';
 import { Size } from './util/size';
 
-const DEFAULT_DISPLAY: DisplayFlag = {
+const DEFAULT_DISPLAY: DisplayFlag = Object.freeze({
     showEditableArea: true,
     showObstacle: true,
     showSize: false,
     showText: true
-};
+});
 
 interface DisplayFlag {
     showEditableArea: boolean;
@@ -19,7 +19,6 @@ interface AppContext {
     canvasSize: Size;
     editableTopLeftPos: Point;
     editableBottomRightPos: Point;
-    scale: number; // pixel to 1 meter;
     display: DisplayFlag;
 }
 

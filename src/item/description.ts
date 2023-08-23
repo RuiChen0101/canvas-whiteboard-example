@@ -8,6 +8,7 @@ import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
 import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/resize-strategy';
 import TextEditStrategy, { FreeTextEditStrategy } from '../interactor/text-edit-strategy';
+import IndicatorStrategy, { NoIndicatorStrategy } from '../interactor/indicator-strategy';
 
 interface DescriptionProps {
     id: string;
@@ -56,6 +57,10 @@ class Description extends ItemBase<DescriptionState> implements Item, TextEditab
 
     get textEditStrategy(): TextEditStrategy {
         return new FreeTextEditStrategy();
+    }
+
+    get indicatorStrategy(): IndicatorStrategy {
+        return new NoIndicatorStrategy();
     }
 
     constructor(props: DescriptionProps);

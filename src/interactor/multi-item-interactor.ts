@@ -1,15 +1,17 @@
 import Item from '../item/item';
 import Shape from '../shape/shape';
 import Circle from '../shape/circle';
+import AppContext from '../AppContext';
 import Rectangle from '../shape/rectangle';
 import { ORIGIN, Point } from '../util/point';
 import { Size, ZERO_SIZE } from '../util/size';
 import { FontStyle } from '../type/font-style';
+import SizeIndicator from '../indicator/size-indicator';
 import MoveStrategy, { FreeMoveStrategy } from './move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from './rotate-strategy';
 import ResizeStrategy, { GroupResizeStrategy } from './resize-strategy';
 import { ANCHOR_SIZE, InteractingType, InteractorInfo, ItemInteractor, PADDING } from './item-interactor';
-import AppContext from '../AppContext';
+import IndicatorStrategy, { SizeIndicatorStrategy } from './indicator-strategy';
 
 class MultiItemInteractor implements ItemInteractor {
     private _items: Item[] = [];
@@ -24,9 +26,10 @@ class MultiItemInteractor implements ItemInteractor {
         lastPos: ORIGIN,
     };
 
-    private _resizeStrategy: ResizeStrategy = new GroupResizeStrategy();
-    private _rotateStrategy: RotateStrategy = new FreeRotateStrategy();
     private _moveStrategy: MoveStrategy = new FreeMoveStrategy();
+    private _rotateStrategy: RotateStrategy = new FreeRotateStrategy();
+    private _resizeStrategy: ResizeStrategy = new GroupResizeStrategy();
+    private _indicatorStrategy: IndicatorStrategy = new SizeIndicatorStrategy();
 
     private _interact: InteractingType = InteractingType.None;
 
@@ -132,15 +135,16 @@ class MultiItemInteractor implements ItemInteractor {
     }
 
     draw(): Shape[] {
-        const ctx = this._info;
+        const info = this._info;
         const borderColor: string = this._invalid ? "#dc3545" : "#0d6efd";
         return [
-            new Rectangle({ pos: { x: ctx.topLeft.x - PADDING, y: ctx.topLeft.y - PADDING }, size: { w: ctx.size.w + (PADDING * 2), h: ctx.size.h + (PADDING * 2) }, borderColor: borderColor }),
-            new Rectangle({ pos: { x: ctx.topLeft.x - PADDING - 4, y: ctx.topLeft.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
-            new Rectangle({ pos: { x: ctx.topRight.x + PADDING - 4, y: ctx.topRight.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
-            new Rectangle({ pos: { x: ctx.bottomLeft.x - PADDING - 4, y: ctx.bottomLeft.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
-            new Rectangle({ pos: { x: ctx.bottomRight.x + PADDING - 4, y: ctx.bottomRight.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
-            new Circle({ pos: { x: ctx.topCenter.x, y: ctx.topCenter.y - PADDING - 10 }, radius: 5, borderColor: borderColor, color: "#fff" })
+            ...(this._indicatorStrategy.draw(info, this._items)),
+            new Rectangle({ pos: { x: info.topLeft.x - PADDING, y: info.topLeft.y - PADDING }, size: { w: info.size.w + (PADDING * 2), h: info.size.h + (PADDING * 2) }, borderColor: borderColor }),
+            new Rectangle({ pos: { x: info.topLeft.x - PADDING - 4, y: info.topLeft.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+            new Rectangle({ pos: { x: info.topRight.x + PADDING - 4, y: info.topRight.y - PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+            new Rectangle({ pos: { x: info.bottomLeft.x - PADDING - 4, y: info.bottomLeft.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+            new Rectangle({ pos: { x: info.bottomRight.x + PADDING - 4, y: info.bottomRight.y + PADDING - 4 }, size: ANCHOR_SIZE, borderColor: borderColor, color: "#fff" }),
+            new Circle({ pos: { x: info.topCenter.x, y: info.topCenter.y - PADDING - 10 }, radius: 5, borderColor: borderColor, color: "#fff" })
         ];
     }
 

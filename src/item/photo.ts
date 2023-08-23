@@ -3,6 +3,7 @@ import Item, { Collidable, ItemBase, ItemState } from './item';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
 import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/resize-strategy';
+import IndicatorStrategy, { NoIndicatorStrategy } from '../interactor/indicator-strategy';
 
 interface PhotoProps extends ItemState {
     url: string;
@@ -34,6 +35,10 @@ class Photo extends ItemBase<PhotoState> implements Item, Collidable {
 
     get rotateStrategy(): RotateStrategy {
         return new FreeRotateStrategy();
+    }
+
+    get indicatorStrategy(): IndicatorStrategy {
+        return new NoIndicatorStrategy();
     }
 
     visit(visitor: Visitor): void {

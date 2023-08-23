@@ -2,10 +2,11 @@ import Tool from './tool';
 import Box from '../item/box';
 import Shape from '../shape/shape';
 import Random from '../util/random';
-import AppContext, { DEFAULT_DISPLAY } from '../AppContext';
 import ItemPool from '../item/item-pool';
 import Rectangle from '../shape/rectangle';
 import DrawingVisitor from '../visitor/drawing-visitor';
+import SizeIndicator from '../indicator/size-indicator';
+import AppContext, { DEFAULT_DISPLAY } from '../AppContext';
 import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
 
 class MassiveBoxDrawingTool implements Tool {
@@ -70,14 +71,15 @@ class MassiveBoxDrawingTool implements Tool {
         }
         return [
             ...visitor.getResult(),
+            ...(new SizeIndicator(topLeft, size).draw()),
             new Rectangle({ pos: topLeft, size: size })
         ];
     }
 
     private _populateBox(): Box[] {
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
-        const countW = Math.floor(size.w / 100);
-        const countH = Math.floor(size.h / 50);
+        const countW = Math.floor(size.w / 105);
+        const countH = Math.floor(size.h / 55);
         if (countW === 0 || countH === 0) return [];
         const box: Box[] = [];
         for (let i = 0; i < countW; i++) {

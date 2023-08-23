@@ -6,6 +6,7 @@ import { ORIGIN, Point, ensureTopLeftSize } from '../util/point';
 import Obstacle from '../item/obstacle';
 import Rectangle from '../shape/rectangle';
 import AppContext from '../AppContext';
+import SizeIndicator from '../indicator/size-indicator';
 
 class ObstacleDrawingTool implements Tool {
     private _startPos: Point = ORIGIN;
@@ -56,6 +57,7 @@ class ObstacleDrawingTool implements Tool {
         const [topLeft, size] = ensureTopLeftSize(this._startPos, this._endPos);
         const borderColor: string | undefined = this._checkOutBound() ? "#dc3545" : undefined;
         return [
+            ...(new SizeIndicator(topLeft, size).draw()),
             new Rectangle({ pos: topLeft, size: size, color: "#000", borderWidth: 3, borderColor: borderColor })
         ];
     }

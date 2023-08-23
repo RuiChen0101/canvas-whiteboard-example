@@ -8,6 +8,7 @@ import RotateStrategy from '../interactor/rotate-strategy';
 import TextEditStrategy from '../interactor/text-edit-strategy';
 import EventNotifier, { EventNotifierBase } from '../util/event';
 import { boundingBoxForRotatedRectangle } from '../util/bounding-box';
+import IndicatorStrategy from '../interactor/indicator-strategy';
 
 enum ItemEvent {
     Update = 'update'
@@ -39,6 +40,7 @@ interface Item extends EventNotifier {
     get moveStrategy(): MoveStrategy;
     get resizeStrategy(): ResizeStrategy;
     get rotateStrategy(): RotateStrategy;
+    get indicatorStrategy(): IndicatorStrategy;
     visit(visitor: Visitor): void;
 }
 
@@ -93,6 +95,7 @@ abstract class ItemBase<State extends ItemState> extends EventNotifierBase imple
     abstract get moveStrategy(): MoveStrategy;
     abstract get resizeStrategy(): ResizeStrategy;
     abstract get rotateStrategy(): RotateStrategy;
+    abstract get indicatorStrategy(): IndicatorStrategy;
 
     constructor(state: State) {
         super();
