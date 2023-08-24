@@ -1,10 +1,10 @@
-import { Size } from '../util/size';
-import { FontStyle } from '../type/font-style';
-import { TextEditableItem } from '../item/item';
-import { InteractorInfo } from './item-interactor';
-import { fourCornerForRotatedRectangle } from '../util/bounding-box';
-import { measureTextHeight, measureTextWidth } from '../util/font-matric';
-import { ORIGIN, Point, addPoints, middlePoint, rotatePoint } from '../util/point';
+import { Size } from '../../util/size';
+import { FontStyle } from '../../type/font-style';
+import { TextEditableItem } from '../../item/item';
+import { InteractorInfo } from '../item-interactor';
+import { fourCornerForRotatedRectangle } from '../../util/bounding-box';
+import { measureTextHeight, measureTextWidth } from '../../util/font-measure';
+import { ORIGIN, Point, addPoints, middlePoint, rotatePoint } from '../../util/point';
 
 interface TextEditStrategy {
     startEdit(info: InteractorInfo, item: TextEditableItem): [string, Point, Size, number, FontStyle, string];

@@ -1,6 +1,6 @@
-import Item from '../item/item';
-import { InteractorInfo } from './item-interactor';
-import { Point, centerPoint, diffPoints, pointAngle, rotatePoint } from '../util/point';
+import Item from '../../item/item';
+import { InteractorInfo } from '../item-interactor';
+import { Point, centerPoint, diffPoints, pointAngle, rotatePoint } from '../../util/point';
 
 interface RotateStrategy {
     rotate(info: InteractorInfo, items: Item[], pos: Point): void

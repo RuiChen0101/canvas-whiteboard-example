@@ -1,7 +1,7 @@
-import Item from '../item/item';
-import { InteractorInfo } from './item-interactor';
-import { fourCornerForRotatedRectangle } from '../util/bounding-box';
-import { ORIGIN, Point, addPoints, centerPoint, diffPoints, middlePoint, rotatePoint, upScalePoint } from '../util/point';
+import Item from '../../item/item';
+import { InteractorInfo } from '../item-interactor';
+import { fourCornerForRotatedRectangle } from '../../util/bounding-box';
+import { ORIGIN, Point, addPoints, diffPoints, middlePoint, rotatePoint, upScalePoint } from '../../util/point';
 
 interface ResizeStrategy {
     resizeTopLeft(info: InteractorInfo, items: Item[], pos: Point): void;

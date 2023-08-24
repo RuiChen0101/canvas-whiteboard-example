@@ -2,7 +2,7 @@ import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import { FontStyle } from '../type/font-style';
-import { measureTextHeight, measureTextWidth } from '../util/font-matric';
+import { measureTextHeight, measureTextWidth } from '../util/font-measure';
 import Item, { ItemBase, ItemEvent, ItemState, TextEditable } from './item';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/strategy/move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/strategy/rotate-strategy';
