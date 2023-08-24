@@ -1,8 +1,8 @@
 # Canvas Whiteboard Example Test
 
-[live demo](!https://ruichen0101.github.io/canvas-whiteboard-example/)
+[live demo](https://ruichen0101.github.io/canvas-whiteboard-example/)
 
-An example implementation of canvas-based whiteboard, including camera control, item creation and deletion, item manipulation, collision detection and text editing.
+An example implementation of canvas base whiteboard, including camera control, item creation and deletion, item manipulation, collision detection and text editing.
 
 ##  Feature
 
@@ -37,28 +37,28 @@ An example implementation of canvas-based whiteboard, including camera control, 
 
 ### General
 
-- Component orchestration: [src/App.tsx](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/App.tsx)
-- Canvas: [src/Canvas.tsx](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/Canvas.tsx)
-- Camera control: [src/util/camera-control.ts](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/util/camera-control.ts)
+- Component orchestration: [src/App.tsx](src/App.tsx)
+- Canvas: [src/Canvas.tsx](src/Canvas.tsx)
+- Camera control: [src/util/camera-control.ts](src/util/camera-control.ts)
 
 ### Item and Interaction
 
-- Item definition: [src/item](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/item)
-- Item management: [src/item/item-pool.ts](!https://github.com/RuiChen0101/canvas-whiteboard-example/blob/master/src/item/item-pool.ts)
-- Item Interaction: [src/interactor](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/interactor)
-- Interaction Strategy: [src/interactor/strategy](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/interactor/strategy)
-- Text Editing: [src/text-editor](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/text-editor)
-- Collision detection: [src/quadtree](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/quadtree)
+- Item definition: [src/item](src/item)
+- Item management: [src/item/item-pool.ts](src/item/item-pool.ts)
+- Item Interaction: [src/interactor](src/interactor)
+- Interaction Strategy: [src/interactor/strategy](src/interactor/strategy)
+- Text Editing: [src/text-editor](src/text-editor)
+- Collision detection: [src/quadtree](src/quadtree)
 
 ### Drawing
 
-- Canvas drawing adapter: [src/shape](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/shape)
-- Item drawing: [src/visitor/drawing-visitor.ts](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/visitor/drawing-visitor.ts)
+- Canvas drawing adapter: [src/shape](src/shape)
+- Item drawing: [src/visitor/drawing-visitor.ts](src/visitor/drawing-visitor.ts)
 
 ### User Interface
 
-- Editing Tools: [src/tool](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/tool)
-- Overlay: [src/overlay](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/overlay)
+- Editing Tools: [src/tool](src/tool)
+- Overlay: [src/overlay](src/overlay)
 
 ## LICENSE
 
