@@ -1,14 +1,7 @@
 import sha1 from 'crypto-js/sha1';
 import enc from 'crypto-js/enc-hex';
-import { Size } from '../util/size';
+import ImageData from '../type/image-data';
 import { imageSize, imageUrlToBase64 } from '../util/image';
-
-interface ImageData {
-    url: string;
-    urlHash: string;
-    data: string;
-    size: Size;
-}
 
 class ImagePreloader {
     private _imageData: Map<string, ImageData> = new Map();
@@ -45,4 +38,3 @@ class ImagePreloader {
 }
 
 export default ImagePreloader;
-export type { ImageData };

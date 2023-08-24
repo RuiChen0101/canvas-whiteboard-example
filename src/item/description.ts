@@ -4,11 +4,11 @@ import Visitor from '../visitor/visitor';
 import { FontStyle } from '../type/font-style';
 import { measureTextHeight, measureTextWidth } from '../util/font-matric';
 import Item, { ItemBase, ItemEvent, ItemState, TextEditable } from './item';
-import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
-import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
-import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/resize-strategy';
-import TextEditStrategy, { FreeTextEditStrategy } from '../interactor/text-edit-strategy';
-import IndicatorStrategy, { NoIndicatorStrategy } from '../interactor/indicator-strategy';
+import MoveStrategy, { FreeMoveStrategy } from '../interactor/strategy/move-strategy';
+import RotateStrategy, { FreeRotateStrategy } from '../interactor/strategy/rotate-strategy';
+import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/strategy/resize-strategy';
+import TextEditStrategy, { FreeTextEditStrategy } from '../interactor/strategy/text-edit-strategy';
+import IndicatorStrategy, { NoIndicatorStrategy } from '../interactor/strategy/indicator-strategy';
 
 interface DescriptionProps {
     id: string;

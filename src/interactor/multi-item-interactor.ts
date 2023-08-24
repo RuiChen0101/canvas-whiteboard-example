@@ -6,12 +6,11 @@ import Rectangle from '../shape/rectangle';
 import { ORIGIN, Point } from '../util/point';
 import { Size, ZERO_SIZE } from '../util/size';
 import { FontStyle } from '../type/font-style';
-import SizeIndicator from '../indicator/size-indicator';
-import MoveStrategy, { FreeMoveStrategy } from './move-strategy';
-import RotateStrategy, { FreeRotateStrategy } from './rotate-strategy';
-import ResizeStrategy, { GroupResizeStrategy } from './resize-strategy';
+import MoveStrategy, { FreeMoveStrategy } from './strategy/move-strategy';
+import RotateStrategy, { FreeRotateStrategy } from './strategy/rotate-strategy';
+import ResizeStrategy, { GroupResizeStrategy } from './strategy/resize-strategy';
+import IndicatorStrategy, { SizeIndicatorStrategy } from './strategy/indicator-strategy';
 import { ANCHOR_SIZE, InteractingType, InteractorInfo, ItemInteractor, PADDING } from './item-interactor';
-import IndicatorStrategy, { SizeIndicatorStrategy } from './indicator-strategy';
 
 class MultiItemInteractor implements ItemInteractor {
     private _items: Item[] = [];

@@ -1,16 +1,15 @@
 import Tool from './tool';
-import Shape from '../shape/shape';
-import { ORIGIN, Point, addPoints, diffPoints, middlePoint, pointAngle, pointDistance } from '../util/point';
-import Rotate from '../shape/rotate';
 import Line from '../shape/line';
 import Text from '../shape/text';
+import Shape from '../shape/shape';
+import Rotate from '../shape/rotate';
+import { ORIGIN, Point, addPoints, diffPoints, middlePoint, pointAngle, pointDistance } from '../util/point';
 
 class MeasureTool implements Tool {
     private _startPos: Point = ORIGIN;
     private _angle: number = 0;
     private _distance: number = 0;
     private _activate: boolean = false;
-
 
     get cursor(): string {
         return 'crosshair';

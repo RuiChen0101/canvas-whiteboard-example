@@ -7,12 +7,12 @@ import enc from 'crypto-js/enc-hex';
 import Rotate from '../shape/rotate';
 import Obstacle from '../item/obstacle';
 import Rectangle from '../shape/rectangle';
+import ImageData from '../type/image-data';
 import { DisplayFlag } from '../AppContext';
 import ImageShape from '../shape/image-shape';
 import Description from '../item/description';
 import Visitor, { VisitorBase } from './visitor';
 import { Point, centerPoint } from '../util/point';
-import { ImageData } from '../preloader/image-preload';
 import SizeIndicator from '../indicator/size-indicator';
 
 class DrawingVisitor extends VisitorBase implements Visitor {

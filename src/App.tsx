@@ -4,6 +4,7 @@ import Photo from './item/photo';
 import Random from './util/random';
 import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
+import ImageData from './type/image-data';
 import Description from './item/description';
 import { ORIGIN, Point } from './util/point';
 import { Size, ZERO_SIZE } from './util/size';
@@ -19,7 +20,7 @@ import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
 import MassiveBoxDrawingTool from './tool/massive-box-drawing-tool';
-import ImagePreloader, { ImageData } from './preloader/image-preload';
+import ImagePreloader from './preloader/image-preload';
 import EditableAreaIndicator from './indicator/editable-area-indicator';
 import CollectImageUrlVisitor from './visitor/collect-image-url-visitor';
 

@@ -1,11 +1,11 @@
 import Visitor from '../visitor/visitor';
 import { DEFAULT_STYLE, FontStyle } from '../type/font-style';
 import Item, { Collidable, ItemBase, ItemState, TextEditable } from './item';
-import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
-import ResizeStrategy, { FreeResizeStrategy } from '../interactor/resize-strategy';
-import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
-import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/indicator-strategy';
-import TextEditStrategy, { BoundedTextEditStrategy } from '../interactor/text-edit-strategy';
+import MoveStrategy, { FreeMoveStrategy } from '../interactor/strategy/move-strategy';
+import ResizeStrategy, { FreeResizeStrategy } from '../interactor/strategy/resize-strategy';
+import RotateStrategy, { FreeRotateStrategy } from '../interactor/strategy/rotate-strategy';
+import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/strategy/indicator-strategy';
+import TextEditStrategy, { BoundedTextEditStrategy } from '../interactor/strategy/text-edit-strategy';
 
 interface BoxProps extends ItemState {
     name?: string;

@@ -3,7 +3,7 @@ import enc from 'crypto-js/enc-hex';
 import { toast } from 'react-toastify';
 import Form from 'react-bootstrap/esm/Form';
 import { Component, ReactNode } from 'react';
-import { ImageData } from '../../preloader/image-preload';
+import ImageData from '../../type/image-data';
 import { imageSize, imageUrlToBase64 } from '../../util/image';
 
 import { DialogShareProps } from '../base/DialogBase';

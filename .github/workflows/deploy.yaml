@@ -1,0 +1,17 @@
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  deploy:
+    name: deploy to staging
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Deploy React to GitHub Pages
+      # You may pin to the exact commit or the version.
+      # uses: bitovi/github-actions-react-to-github-pages@1782b3410beca05fb72bd089e5620790c0c4d883
+      uses: bitovi/github-actions-react-to-github-pages@v1.2.0
+      with:
+        path: build
+        build_command: npm run build

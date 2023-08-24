@@ -1,7 +1,7 @@
-import SizeIndicator from '../indicator/size-indicator';
-import Item from '../item/item';
-import Shape from '../shape/shape';
-import { InteractorInfo } from './item-interactor';
+import SizeIndicator from '../../indicator/size-indicator';
+import Item from '../../item/item';
+import Shape from '../../shape/shape';
+import { InteractorInfo } from '../item-interactor';
 
 interface IndicatorStrategy {
     draw(info: InteractorInfo, items: Item[]): Shape[];

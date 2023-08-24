@@ -1,9 +1,9 @@
 import Visitor from '../visitor/visitor';
 import { ItemBase, ItemState } from './item';
-import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
-import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
-import ResizeStrategy, { FreeResizeStrategy } from '../interactor/resize-strategy';
-import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/indicator-strategy';
+import MoveStrategy, { FreeMoveStrategy } from '../interactor/strategy/move-strategy';
+import RotateStrategy, { FreeRotateStrategy } from '../interactor/strategy/rotate-strategy';
+import ResizeStrategy, { FreeResizeStrategy } from '../interactor/strategy/resize-strategy';
+import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/strategy/indicator-strategy';
 
 interface ObstacleState extends ItemState { }
 

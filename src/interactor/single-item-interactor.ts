@@ -3,17 +3,17 @@ import Circle from '../shape/circle';
 import Rotate from '../shape/rotate';
 import AppContext from '../AppContext';
 import Rectangle from '../shape/rectangle';
-import MoveStrategy from './move-strategy';
 import { Size, ZERO_SIZE } from '../util/size';
-import ResizeStrategy from './resize-strategy';
-import RotateStrategy from './rotate-strategy';
 import { FontStyle } from '../type/font-style';
-import TextEditStrategy from './text-edit-strategy';
+import MoveStrategy from './strategy/move-strategy';
 import Item, { TextEditableItem } from '../item/item';
+import ResizeStrategy from './strategy/resize-strategy';
+import RotateStrategy from './strategy/rotate-strategy';
+import TextEditStrategy from './strategy/text-edit-strategy';
+import IndicatorStrategy from './strategy/indicator-strategy';
 import { ORIGIN, Point, centerPoint, rotatePoint } from '../util/point';
 import { fourCornerForRotatedRectangle, isRectangleCollide } from '../util/bounding-box';
 import { ANCHOR_SIZE, InteractingType, InteractorInfo, ItemInteractor, PADDING } from './item-interactor';
-import IndicatorStrategy from './indicator-strategy';
 
 class SingleItemInteractor implements ItemInteractor {
     private _item: Item;

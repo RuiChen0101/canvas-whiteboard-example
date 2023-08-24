@@ -1,9 +1,9 @@
 import Visitor from '../visitor/visitor';
 import Item, { Collidable, ItemBase, ItemState } from './item';
-import MoveStrategy, { FreeMoveStrategy } from '../interactor/move-strategy';
-import RotateStrategy, { FreeRotateStrategy } from '../interactor/rotate-strategy';
-import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/resize-strategy';
-import IndicatorStrategy, { NoIndicatorStrategy } from '../interactor/indicator-strategy';
+import MoveStrategy, { FreeMoveStrategy } from '../interactor/strategy/move-strategy';
+import RotateStrategy, { FreeRotateStrategy } from '../interactor/strategy/rotate-strategy';
+import ResizeStrategy, { DiagonalResizeStrategy } from '../interactor/strategy/resize-strategy';
+import IndicatorStrategy, { NoIndicatorStrategy } from '../interactor/strategy/indicator-strategy';
 
 interface PhotoProps extends ItemState {
     url: string;

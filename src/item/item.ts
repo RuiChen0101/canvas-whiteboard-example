@@ -2,13 +2,13 @@ import { Size } from '../util/size';
 import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import { FontStyle } from '../type/font-style';
-import MoveStrategy from '../interactor/move-strategy';
-import ResizeStrategy from '../interactor/resize-strategy';
-import RotateStrategy from '../interactor/rotate-strategy';
-import TextEditStrategy from '../interactor/text-edit-strategy';
+import MoveStrategy from '../interactor/strategy/move-strategy';
+import ResizeStrategy from '../interactor/strategy/resize-strategy';
+import RotateStrategy from '../interactor/strategy/rotate-strategy';
+import TextEditStrategy from '../interactor/strategy/text-edit-strategy';
 import EventNotifier, { EventNotifierBase } from '../util/event';
 import { boundingBoxForRotatedRectangle } from '../util/bounding-box';
-import IndicatorStrategy from '../interactor/indicator-strategy';
+import IndicatorStrategy from '../interactor/strategy/indicator-strategy';
 
 enum ItemEvent {
     Update = 'update'

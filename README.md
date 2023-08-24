@@ -1,27 +1,65 @@
-# Canvas Test
+# Canvas Whiteboard Example Test
 
-## Pure Canvas Performance
+[live demo](!https://ruichen0101.github.io/canvas-whiteboard-example/)
 
-1. redraw on action
+An example implementation of canvas-based whiteboard, including camera control, item creation and deletion, item manipulation, collision detection and text editing.
 
-- Failing point for Laptop(M1 Mac)
-    - square: 35,000
-    - text: 45,000
-    - 45-degree rotated square: 9,500
-    - 45-degree rotated text: 8,500
+##  Feature
 
-- Failing point for SmartPhone(IPhone11)
-    - square: 6,000
-    - text: 2,500
-    - 45-degree rotated square: 1,500
-    - 45-degree rotated text: 13,00
+### General
 
-2. redraw with interval(with or without redraw flag)
+- Drawing to create items.
+- Undo.
+- Double-click to trigger text editing.
+- Limiting editable area.
 
-- Failing point for Laptop(M1 Mac)
-    - square: 120,000
-    - 45-degree rotated square: 40,000
+### Camera Control
 
-- Failing point for SmartPhone(IPhone11)
-    - square: 10,000
-    - 45-degree rotated square: 3,500
+- Zoom in, zoom out and move with the mouse and trackpad.
+- Limiting camera region.
+- Bouncing over-scroll correction.
+
+### Item Control
+
+- Selecting with click and region.
+- Single item resize, move, rotate and text editing(for text editable item).
+- Grouped items resize, move and rotate.
+- Item collision detection and highlight.
+
+### Others
+
+- Ability to control the presentation of (some) items.
+- Size measure and indicator.
+- (Maybe) efficient collision detection with quadtree.
+- (Maybe) separation of detail implementation.
+
+## Implementation
+
+### General
+
+- Component orchestration: [src/App.tsx](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/App.tsx)
+- Canvas: [src/Canvas.tsx](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/Canvas.tsx)
+- Camera control: [src/util/camera-control.ts](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/util/camera-control.ts)
+
+### Item and Interaction
+
+- Item definition: [src/item](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/item)
+- Item management: [src/item/item-pool.ts](!https://github.com/RuiChen0101/canvas-whiteboard-example/blob/master/src/item/item-pool.ts)
+- Item Interaction: [src/interactor](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/interactor)
+- Interaction Strategy: [src/interactor/strategy](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/interactor/strategy)
+- Text Editing: [src/text-editor](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/text-editor)
+- Collision detection: [src/quadtree](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/quadtree)
+
+### Drawing
+
+- Canvas drawing adapter: [src/shape](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/shape)
+- Item drawing: [src/visitor/drawing-visitor.ts](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/visitor/drawing-visitor.ts)
+
+### User Interface
+
+- Editing Tools: [src/tool](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/tool)
+- Overlay: [src/overlay](!https://github.com/RuiChen0101/canvas-whiteboard-example/tree/master/src/overlay)
+
+## LICENSE
+
+MIT License
