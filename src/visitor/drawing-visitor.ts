@@ -42,7 +42,7 @@ class DrawingVisitor extends VisitorBase implements Visitor {
 
     visitPhoto(photo: Photo): void {
         const imageData = this._imageData.get(this._hash(photo.url));
-        if (imageData === undefined) throw `image not found`;
+        if (imageData === undefined) throw Error(`image not found`);
         const shapes: Shape[] = [
             new ImageShape({ pos: photo.pos, size: photo.size, encodedImage: imageData.data })
         ];

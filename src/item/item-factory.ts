@@ -16,7 +16,7 @@ class ItemFactory {
             case 'obstacle':
                 return new Obstacle({ ...record.state });
             default:
-                throw `unknown item ${record.type}`;
+                throw Error(`unknown item ${record.type}`);
         }
     }
 }

@@ -77,15 +77,15 @@ class MultiItemInteractor implements ItemInteractor {
     }
 
     onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
-        throw `cannot edit text when multiple item selected`;
+        throw Error(`cannot edit text when multiple item selected`);
     }
 
     onTextEdit(ctx: AppContext, text: string): [Point, Size, number] {
-        throw `cannot edit text when multiple item selected`;
+        throw Error(`cannot edit text when multiple item selected`);
     }
 
     onTextEditEnd(text: string): boolean {
-        throw `cannot edit text when multiple item selected`;
+        throw Error(`cannot edit text when multiple item selected`);
     }
 
     onDragStart(pos: Point): void {
