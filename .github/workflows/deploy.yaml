@@ -7,6 +7,10 @@ jobs:
   deploy:
     name: deploy to page
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
     - name: Deploy React to GitHub Pages
       # You may pin to the exact commit or the version.
