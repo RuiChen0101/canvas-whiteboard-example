@@ -12,10 +12,24 @@ jobs:
       pages: write
       id-token: write
     steps:
-    - name: Deploy React to GitHub Pages
-      # You may pin to the exact commit or the version.
-      # uses: bitovi/github-actions-react-to-github-pages@1782b3410beca05fb72bd089e5620790c0c4d883
-      uses: bitovi/github-actions-react-to-github-pages@v1.2.0
-      with:
-        path: build
-        build_command: npm run build
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build
+        shell: bash
+        run: |
+          echo "::group::Build"
+          npm ci
+          npm run build
+          echo "::endgroup::"
+
+      - name: Upload
+        uses: actions/upload-pages-artifact@v1.0.4
+        with: 
+          path: build
+
+      - id: Deploy
+        name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
+        with:
+          token: ${{ github.token }}
