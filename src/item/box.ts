@@ -63,7 +63,7 @@ class Box extends ItemBase<BoxState> implements Item, TextEditable, Collidable {
 
     constructor(argv: BoxProps | BoxState) {
         if ('isEditing' in argv) {
-            super({ ...argv });
+            super(argv);
         } else {
             super({ ...argv, name: argv.name ?? '', isEditing: false, isCollide: false });
         }

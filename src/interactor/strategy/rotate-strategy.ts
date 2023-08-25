@@ -20,7 +20,12 @@ class FreeRotateStrategy implements RotateStrategy {
     }
 }
 
+class NoRotateStrategy implements RotateStrategy {
+    rotate(info: InteractorInfo, items: Item[], pos: Point): void { }
+}
+
 export default RotateStrategy;
 export {
-    FreeRotateStrategy
+    FreeRotateStrategy,
+    NoRotateStrategy
 }

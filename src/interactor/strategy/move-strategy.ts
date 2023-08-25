@@ -15,7 +15,12 @@ class FreeMoveStrategy implements MoveStrategy {
     }
 }
 
+class NoMoveStrategy implements MoveStrategy {
+    move(info: InteractorInfo, items: Item[], pos: Point): void { }
+}
+
 export default MoveStrategy;
 export {
-    FreeMoveStrategy
+    FreeMoveStrategy,
+    NoMoveStrategy
 }

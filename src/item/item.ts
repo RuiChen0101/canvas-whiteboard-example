@@ -3,20 +3,25 @@ import { Point } from '../util/point';
 import Visitor from '../visitor/visitor';
 import { FontStyle } from '../type/font-style';
 import MoveStrategy from '../interactor/strategy/move-strategy';
+import EventNotifier, { EventNotifierBase } from '../util/event';
 import ResizeStrategy from '../interactor/strategy/resize-strategy';
 import RotateStrategy from '../interactor/strategy/rotate-strategy';
-import TextEditStrategy from '../interactor/strategy/text-edit-strategy';
-import EventNotifier, { EventNotifierBase } from '../util/event';
 import { boundingBoxForRotatedRectangle } from '../util/bounding-box';
+import TextEditStrategy from '../interactor/strategy/text-edit-strategy';
 import IndicatorStrategy from '../interactor/strategy/indicator-strategy';
 
 enum ItemEvent {
     Update = 'update'
 }
 
-interface ItemRecord {
+interface ItemMemento {
     type: string;
     state: any;
+}
+
+interface ItemRecord {
+    type: string;
+    data: any;
 }
 
 interface ItemState {
@@ -106,7 +111,7 @@ abstract class ItemBase<State extends ItemState> extends EventNotifierBase imple
 }
 
 export default Item;
-export type { Collidable, TextEditable, TextEditableItem, ItemRecord, ItemState };
+export type { Collidable, TextEditable, TextEditableItem, ItemRecord, ItemMemento, ItemState };
 export {
     ItemBase,
     ItemEvent,

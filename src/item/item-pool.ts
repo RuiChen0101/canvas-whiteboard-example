@@ -135,7 +135,7 @@ class ItemPool {
         this._collideQuadtree.clear();
         const factory = new ItemFactory();
         for (const r of memento.records) {
-            const item = factory.build(r);
+            const item = factory.buildWithMemento(r);
             this.addItem(item);
         }
     }

@@ -96,14 +96,14 @@ class SingleItemInteractor implements ItemInteractor {
     }
 
     onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
-        if (this._textEditStrategy === undefined) throw Error('selected item dose not support text edit');
+        if (this._textEditStrategy === undefined) throw new Error('selected item dose not support text edit');
         this._stillStatic = true;
         this._interact = InteractingType.Text;
         return this._textEditStrategy.startEdit(this._info, this._item as TextEditableItem);
     }
 
     onTextEdit(ctx: AppContext, text: string): [Point, Size, number] {
-        if (this._textEditStrategy === undefined) throw Error('selected item dose not support text edit');
+        if (this._textEditStrategy === undefined) throw new Error('selected item dose not support text edit');
         this._stillStatic = false;
         const [pos, size, rotate] = this._textEditStrategy.onEdit(this._info, this._item as TextEditableItem, text);
         this._inferPosAndSize();
@@ -112,7 +112,7 @@ class SingleItemInteractor implements ItemInteractor {
     }
 
     onTextEditEnd(text: string): boolean {
-        if (this._textEditStrategy === undefined) throw Error('selected item dose not support text edit');
+        if (this._textEditStrategy === undefined) throw new Error('selected item dose not support text edit');
         this._stillStatic = false;
         this._textEditStrategy.endEdit(this._info, this._item as TextEditableItem, text);
         this._interact = InteractingType.None;

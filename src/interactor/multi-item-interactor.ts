@@ -77,15 +77,15 @@ class MultiItemInteractor implements ItemInteractor {
     }
 
     onTextEditStart(): [string, Point, Size, number, FontStyle, string] {
-        throw Error(`cannot edit text when multiple item selected`);
+        throw new Error(`cannot edit text when multiple item selected`);
     }
 
     onTextEdit(ctx: AppContext, text: string): [Point, Size, number] {
-        throw Error(`cannot edit text when multiple item selected`);
+        throw new Error(`cannot edit text when multiple item selected`);
     }
 
     onTextEditEnd(text: string): boolean {
-        throw Error(`cannot edit text when multiple item selected`);
+        throw new Error(`cannot edit text when multiple item selected`);
     }
 
     onDragStart(pos: Point): void {
@@ -149,7 +149,7 @@ class MultiItemInteractor implements ItemInteractor {
 
     private _inferPosAndSize(): void {
         if (this._items.length === 0) return;
-        const [p1, p2] = this._items[0].boundingBox
+        const [p1, p2] = this._items[0].boundingBox;
 
         for (const i of this._items) {
             const [iP1, iP2] = i.boundingBox;

@@ -1,5 +1,5 @@
 import Visitor from '../visitor/visitor';
-import { ItemBase, ItemState } from './item';
+import Item, { ItemBase, ItemState } from './item';
 import MoveStrategy, { FreeMoveStrategy } from '../interactor/strategy/move-strategy';
 import RotateStrategy, { FreeRotateStrategy } from '../interactor/strategy/rotate-strategy';
 import ResizeStrategy, { FreeResizeStrategy } from '../interactor/strategy/resize-strategy';
@@ -7,7 +7,7 @@ import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/strategy
 
 interface ObstacleState extends ItemState { }
 
-class Obstacle extends ItemBase<ObstacleState> {
+class Obstacle extends ItemBase<ObstacleState> implements Item {
 
     get moveStrategy(): MoveStrategy {
         return new FreeMoveStrategy();

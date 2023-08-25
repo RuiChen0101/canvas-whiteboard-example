@@ -15,6 +15,7 @@ interface DescriptionProps {
     pos: Point;
     rotate: number;
     text: string;
+    fontSize?: number;
 }
 
 interface DescriptionState extends ItemState {
@@ -68,13 +69,14 @@ class Description extends ItemBase<DescriptionState> implements Item, TextEditab
 
     constructor(argv: DescriptionProps | DescriptionState) {
         if ('isEditing' in argv && 'fontSize' in argv) {
-            super({ ...argv });
+            super(argv);
         } else {
+            const fontSize = argv.fontSize ?? 16;
             super({
                 ...argv,
-                size: { w: measureTextWidth(argv.text, 'serif', 16), h: measureTextHeight(argv.text, 16, 1.2) },
+                size: { w: measureTextWidth(argv.text, 'serif', fontSize), h: measureTextHeight(argv.text, fontSize, 1.2) },
                 isEditing: false,
-                fontSize: 16,
+                fontSize: fontSize,
             });
         }
     }

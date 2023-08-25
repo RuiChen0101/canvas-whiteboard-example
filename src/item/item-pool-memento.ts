@@ -1,10 +1,10 @@
-import { ItemRecord } from './item';
+import { ItemMemento } from './item';
 
 class ItemPoolMemento {
-    private _records: Readonly<ItemRecord[]>;
-    get records(): Readonly<ItemRecord[]> { return this._records };
+    private _records: Readonly<ItemMemento[]>;
+    get records(): Readonly<ItemMemento[]> { return this._records };
 
-    constructor(records: ItemRecord[]) {
+    constructor(records: ItemMemento[]) {
         this._records = Object.freeze(records);
     }
 }

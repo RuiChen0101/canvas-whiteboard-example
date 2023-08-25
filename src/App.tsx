@@ -2,12 +2,14 @@ import Box from './item/box';
 import Canvas from './Canvas';
 import Photo from './item/photo';
 import Random from './util/random';
+import AppContext from './AppContext';
 import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
 import ImageData from './type/image-data';
 import Description from './item/description';
 import { ORIGIN, Point } from './util/point';
 import { Size, ZERO_SIZE } from './util/size';
+import MeasureTool from './tool/measure-tool';
 import SelectionTool from './tool/selection-tool';
 import Spinner from 'react-bootstrap/esm/Spinner';
 import BoxDrawingTool from './tool/box-drawing-tool';
@@ -15,14 +17,11 @@ import { showDialog } from './dialog/base/DialogBase';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import { Component, ReactNode, createRef } from 'react';
-import AppContext, { DEFAULT_DISPLAY } from './AppContext';
 import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
 import MassiveBoxDrawingTool from './tool/massive-box-drawing-tool';
-import ImagePreloader from './preloader/image-preload';
 import EditableAreaIndicator from './indicator/editable-area-indicator';
-import CollectImageUrlVisitor from './visitor/collect-image-url-visitor';
 
 import './App.scss';
 
@@ -31,7 +30,7 @@ import Toolbox from './overlay/Toolbox';
 import Setting from './overlay/Setting';
 import ImageSelectDialog from './dialog/image/ImageSelectDialog';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
-import MeasureTool from './tool/measure-tool';
+import InitItemVisitor from './visitor/init-item-visitor';
 
 interface AppState {
   isLoading: boolean;
@@ -73,6 +72,7 @@ class App extends Component<any, AppState> {
         }
       }
     }
+    console.log(process.env.PUBLIC_URL);
     this._itemPool = new ItemPool(this.state.ctx.display, this.state.ctx.canvasSize);
     this._currentTool = new SelectionTool(this._itemPool);
     this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 400, y: 300 }, rotate: 0 }));
@@ -82,11 +82,10 @@ class App extends Component<any, AppState> {
   }
 
   async componentDidMount(): Promise<void> {
-    const visitor = new CollectImageUrlVisitor();
+    const visitor = new InitItemVisitor();
     this._itemPool.visit(visitor);
-    const preload = new ImagePreloader();
-    await preload.load(visitor.getResult());
-    this._imageData = preload.getResult();
+    await visitor.waitComplete();
+    this._imageData = visitor.getImageDataResult();
     this.setState({ isLoading: false });
     setTimeout(() => this._updateCanvas(), 100);
     window.addEventListener('keydown', this._onKeyboardDown);
@@ -100,11 +99,11 @@ class App extends Component<any, AppState> {
     const drawVisitor = new DrawingVisitor(this.state.ctx.display, this._imageData);
     this._itemPool.visit(drawVisitor);
     const shapes = drawVisitor.getResult();
+    shapes.push(...this._currentTool.draw());
+    shapes.push(...(this._itemPool.selected?.draw() ?? []));
     if (this.state.ctx.display.showEditableArea) {
       shapes.push(...(new EditableAreaIndicator(this.state.ctx.editableTopLeftPos, this.state.ctx.editableBottomRightPos).draw()));
     }
-    shapes.push(...this._currentTool.draw());
-    shapes.push(...(this._itemPool.selected?.draw() ?? []));
     this._canvasRef.current!.shapes = drawVisitor.getResult();
   }
 
