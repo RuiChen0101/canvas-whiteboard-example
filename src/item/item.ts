@@ -14,7 +14,7 @@ enum ItemEvent {
     Update = 'update'
 }
 
-interface ItemMemento {
+interface ItemSnapshot {
     type: string;
     state: any;
 }
@@ -111,7 +111,7 @@ abstract class ItemBase<State extends ItemState> extends EventNotifierBase imple
 }
 
 export default Item;
-export type { Collidable, TextEditable, TextEditableItem, ItemRecord, ItemMemento, ItemState };
+export type { Collidable, TextEditable, TextEditableItem, ItemRecord, ItemSnapshot, ItemState };
 export {
     ItemBase,
     ItemEvent,

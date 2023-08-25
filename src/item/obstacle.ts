@@ -8,6 +8,7 @@ import IndicatorStrategy, { SizeIndicatorStrategy } from '../interactor/strategy
 interface ObstacleState extends ItemState { }
 
 class Obstacle extends ItemBase<ObstacleState> implements Item {
+    static get typeId(): string { return 'obstacle'; }
 
     get moveStrategy(): MoveStrategy {
         return new FreeMoveStrategy();

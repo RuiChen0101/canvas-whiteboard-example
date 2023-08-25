@@ -3,37 +3,37 @@ import Photo from './photo';
 import Obstacle from './obstacle';
 import Description from './description';
 import RemoteComposite from './remote-composite';
-import Item, { ItemMemento, ItemRecord } from './item';
+import Item, { ItemSnapshot, ItemRecord } from './item';
 
 class ItemFactory {
-    buildWithMemento(record: ItemMemento): Item {
-        switch (record.type) {
-            case 'box':
-                return new Box({ ...record.state });
-            case 'photo':
-                return new Photo({ ...record.state });
-            case 'description':
-                return new Description({ ...record.state });
-            case 'obstacle':
-                return new Obstacle({ ...record.state });
-            case 'remote-composite':
-                return new RemoteComposite({ ...record.state });
+    buildWithSnapshot(snapshot: ItemSnapshot): Item {
+        switch (snapshot.type) {
+            case Box.typeId:
+                return new Box({ ...snapshot.state });
+            case Photo.typeId:
+                return new Photo({ ...snapshot.state });
+            case Description.typeId:
+                return new Description({ ...snapshot.state });
+            case Obstacle.typeId:
+                return new Obstacle({ ...snapshot.state });
+            case RemoteComposite.typeId:
+                return new RemoteComposite({ ...snapshot.state });
             default:
-                throw new Error(`unknown item ${record.type}`);
+                throw new Error(`unknown item ${snapshot.type}`);
         }
     }
 
     buildWithRecord(record: ItemRecord): Item {
         switch (record.type) {
-            case 'box':
+            case Box.typeId:
                 return new Box({ ...record.data });
-            case 'photo':
+            case Photo.typeId:
                 return new Photo({ ...record.data });
-            case 'description':
+            case Description.typeId:
                 return new Description({ ...record.data });
-            case 'obstacle':
+            case Obstacle.typeId:
                 return new Obstacle({ ...record.data });
-            case 'remote-composite':
+            case RemoteComposite.typeId:
                 return new RemoteComposite({ ...record.data });
             default:
                 throw new Error(`unknown item ${record.type}`);

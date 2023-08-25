@@ -1,0 +1,16 @@
+.show-export-dialog {
+    max-width: 768px;
+
+    .show-export-dialog-code {
+        padding: 12px;
+        max-height: 500px;
+        overflow: auto;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+
+        pre {
+            display: inline-block;
+            overflow-x: hidden;
+        }
+    }
+}

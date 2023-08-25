@@ -15,6 +15,8 @@ interface PhotoState extends ItemState {
 }
 
 class Photo extends ItemBase<PhotoState> implements Item, Collidable {
+    static get typeId(): string { return 'photo'; }
+
     get url(): string { return this._state.url; }
 
     get collidable(): boolean { return true; }
@@ -47,3 +49,4 @@ class Photo extends ItemBase<PhotoState> implements Item, Collidable {
 }
 
 export default Photo;
+export type { PhotoProps, PhotoState };

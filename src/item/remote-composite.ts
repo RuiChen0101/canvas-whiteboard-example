@@ -19,6 +19,8 @@ interface RemoteCompositeState extends ItemState {
 }
 
 class RemoteComposite extends ItemBase<RemoteCompositeState> implements Item {
+    static get typeId(): string { return 'remote-composite'; }
+
     get items(): Item[] { return this._state.items; }
 
     get moveStrategy(): MoveStrategy {

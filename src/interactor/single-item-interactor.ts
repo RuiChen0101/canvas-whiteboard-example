@@ -58,7 +58,7 @@ class SingleItemInteractor implements ItemInteractor {
         this._resizeStrategy = item.resizeStrategy;
         this._rotateStrategy = item.rotateStrategy;
         this._indicatorStrategy = item.indicatorStrategy;
-        if (!('textEditable' in this._item)) {
+        if ('textEditable' in this._item) {
             this._textEditStrategy = (this._item as TextEditableItem).textEditStrategy;
         }
         this._inferPosAndSize();

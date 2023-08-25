@@ -1,11 +1,11 @@
-import { ItemMemento } from './item';
+import { ItemSnapshot } from './item';
 
 class ItemPoolMemento {
-    private _records: Readonly<ItemMemento[]>;
-    get records(): Readonly<ItemMemento[]> { return this._records };
+    private _snapshots: Readonly<ItemSnapshot[]>;
+    get snapshots(): Readonly<ItemSnapshot[]> { return this._snapshots };
 
-    constructor(records: ItemMemento[]) {
-        this._records = Object.freeze(records);
+    constructor(snapshots: ItemSnapshot[]) {
+        this._snapshots = Object.freeze(snapshots);
     }
 }
 

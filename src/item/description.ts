@@ -25,6 +25,8 @@ interface DescriptionState extends ItemState {
 }
 
 class Description extends ItemBase<DescriptionState> implements Item, TextEditable {
+    static get typeId(): string { return 'description'; }
+
     get textEditable(): boolean { return true; }
     get text(): string { return this._state.text; }
     get fontStyle(): FontStyle { return { family: "serif", size: this._state.fontSize, lineHight: 1.2 } };
@@ -87,4 +89,4 @@ class Description extends ItemBase<DescriptionState> implements Item, TextEditab
 }
 
 export default Description;
-export type { DescriptionState };
+export type { DescriptionProps, DescriptionState };

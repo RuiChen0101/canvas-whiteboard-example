@@ -28,9 +28,11 @@ import './App.scss';
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
 import Setting from './overlay/Setting';
-import ImageSelectDialog from './dialog/image/ImageSelectDialog';
+import ImageSelectDialog from './dialog/ImageSelectDialog';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
 import InitItemVisitor from './visitor/init-item-visitor';
+import ShowExportDialog from './dialog/ShowExportDialog';
+import ExportVisitor from './visitor/export-visitor';
 
 interface AppState {
   isLoading: boolean;
@@ -72,7 +74,6 @@ class App extends Component<any, AppState> {
         }
       }
     }
-    console.log(process.env.PUBLIC_URL);
     this._itemPool = new ItemPool(this.state.ctx.display, this.state.ctx.canvasSize);
     this._currentTool = new SelectionTool(this._itemPool);
     this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 400, y: 300 }, rotate: 0 }));
@@ -241,6 +242,7 @@ class App extends Component<any, AppState> {
   private _onDoubleClick = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected !== undefined) {
       const interactType = this._itemPool.selected.checkInteract(canvasPos, true);
+      console.log(interactType);
       if (interactType === InteractingType.Text) {
         const [type, pos, size, rotate, style, text] = this._itemPool.selected.onTextEditStart();
         this._textBuffer = text;
@@ -321,6 +323,15 @@ class App extends Component<any, AppState> {
     });
   }
 
+  private _showExportDialog = (): void => {
+    const visitor = new ExportVisitor();
+    this._itemPool.visit(visitor);
+
+    showDialog((close: () => void): ReactNode => {
+      return (<ShowExportDialog onClose={close} json={visitor.getResult()} />)
+    }, { size: 'lg' });
+  }
+
   render(): ReactNode {
     if (this.state.isLoading) return (<div id="app" className="d-flex justify-content-center align-items-center"><Spinner animation="border" /></div>)
     return (
@@ -329,6 +340,7 @@ class App extends Component<any, AppState> {
         style={{ cursor: this.state.cursorType }}>
         <Toolbox
           onAddImage={this._showImageSelectDialog}
+          onShowExportDialog={this._showExportDialog}
           currentTool={this.state.currentTool}
           onToolChange={this._onToolChange}
         />

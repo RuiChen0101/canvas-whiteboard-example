@@ -18,6 +18,8 @@ interface BoxState extends ItemState {
 }
 
 class Box extends ItemBase<BoxState> implements Item, TextEditable, Collidable {
+    static get typeId(): string { return 'box'; }
+
     get textEditable(): boolean { return true; }
     get text(): string { return this._state.name; }
     get fontStyle(): FontStyle { return DEFAULT_STYLE; }
@@ -75,4 +77,4 @@ class Box extends ItemBase<BoxState> implements Item, TextEditable, Collidable {
 }
 
 export default Box;
-export type { BoxState };
+export type { BoxProps, BoxState };
