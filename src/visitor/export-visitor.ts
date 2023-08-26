@@ -4,6 +4,7 @@ import Visitor, { VisitorBase } from './visitor';
 import Photo, { PhotoProps } from '../item/photo';
 import Obstacle, { ObstacleState } from '../item/obstacle';
 import Description, { DescriptionProps } from '../item/description';
+import RemoteComposite, { RemoteCompositeProps } from '../item/remote-composite';
 
 class ExportVisitor extends VisitorBase implements Visitor {
     private _records: ItemRecord[] = [];
@@ -59,6 +60,17 @@ class ExportVisitor extends VisitorBase implements Visitor {
         };
         this._records.push({
             type: Photo.typeId,
+            data: data
+        });
+    }
+
+    visitRemoteComposite(remoteComposite: RemoteComposite): void {
+        const data: RemoteCompositeProps = {
+            id: remoteComposite.id,
+            url: remoteComposite.url
+        };
+        this._records.push({
+            type: RemoteComposite.typeId,
             data: data
         });
     }

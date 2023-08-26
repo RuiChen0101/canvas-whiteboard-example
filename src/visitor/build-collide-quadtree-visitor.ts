@@ -1,8 +1,9 @@
 import Box from '../item/box';
-import Obstacle from '../item/obstacle';
 import Photo from '../item/photo';
 import { Quadtree } from '../quadtree';
+import Obstacle from '../item/obstacle';
 import Visitor, { VisitorBase } from './visitor';
+import RemoteComposite from '../item/remote-composite';
 
 class BuildCollideQuadtreeVisitor extends VisitorBase implements Visitor {
     private _quadtree: Quadtree<string>;
@@ -22,6 +23,12 @@ class BuildCollideQuadtreeVisitor extends VisitorBase implements Visitor {
 
     visitObstacle(obstacle: Obstacle): void {
         this._quadtree.insert(obstacle.id, obstacle.pos, obstacle.size, obstacle.rotate);
+    }
+
+    visitRemoteComposite(remoteComposite: RemoteComposite): void {
+        for (const i of remoteComposite.items) {
+            i.visit(this);
+        }
     }
 
     getResult(): Quadtree<string> {

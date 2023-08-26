@@ -1,0 +1,31 @@
+[
+    {
+        "type": "description",
+        "data": {
+            "id": "xRSzc28s",
+            "pos": {
+                "x": 1325.5527897884865,
+                "y": 229.19324299586663
+            },
+            "rotate": 0,
+            "text": "This text and box below are loaded\nby RemoteComposite via internet",
+            "fontSize": 16
+        }
+    },
+    {
+        "type": "box",
+        "data": {
+            "id": "5x45Yxjh",
+            "pos": {
+                "x": 1326.6408329226997,
+                "y": 283.50306813013253
+            },
+            "size": {
+                "w": 237.55364806866942,
+                "h": 129.78540772532193
+            },
+            "rotate": 0,
+            "name": "Box"
+        }
+    }
+]

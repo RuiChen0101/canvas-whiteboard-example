@@ -14,6 +14,7 @@ import Description from '../item/description';
 import Visitor, { VisitorBase } from './visitor';
 import { Point, centerPoint } from '../util/point';
 import SizeIndicator from '../indicator/size-indicator';
+import RemoteComposite from '../item/remote-composite';
 
 class DrawingVisitor extends VisitorBase implements Visitor {
     private _shapes: Shape[] = [];
@@ -76,6 +77,12 @@ class DrawingVisitor extends VisitorBase implements Visitor {
             shapes.push(...(new SizeIndicator(obstacle.pos, obstacle.size).draw()));
         }
         this._shapes.push(...this._decoWithRotate(shapes, centerPoint(obstacle.pos, obstacle.size), obstacle.rotate));
+    }
+
+    visitRemoteComposite(remoteComposite: RemoteComposite): void {
+        for (const i of remoteComposite.items) {
+            i.visit(this);
+        }
     }
 
     private _decoWithRotate(shapes: Shape[], anchor: Point, rotate: number): Shape[] {

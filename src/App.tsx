@@ -3,7 +3,6 @@ import Canvas from './Canvas';
 import Photo from './item/photo';
 import Random from './util/random';
 import AppContext from './AppContext';
-import Obstacle from './item/obstacle';
 import ItemPool from './item/item-pool';
 import ImageData from './type/image-data';
 import Description from './item/description';
@@ -13,10 +12,13 @@ import MeasureTool from './tool/measure-tool';
 import SelectionTool from './tool/selection-tool';
 import Spinner from 'react-bootstrap/esm/Spinner';
 import BoxDrawingTool from './tool/box-drawing-tool';
+import ExportVisitor from './visitor/export-visitor';
 import { showDialog } from './dialog/base/DialogBase';
+import RemoteComposite from './item/remote-composite';
 import DrawingVisitor from './visitor/drawing-visitor';
 import ItemPoolMemento from './item/item-pool-memento';
 import { Component, ReactNode, createRef } from 'react';
+import InitItemVisitor from './visitor/init-item-visitor';
 import { DEFAULT_STYLE, FontStyle } from './type/font-style';
 import ObstacleDrawingTool from './tool/obstacle-drawing-tool';
 import { InteractingType } from './interactor/item-interactor';
@@ -28,11 +30,10 @@ import './App.scss';
 import Tool from './tool/tool';
 import Toolbox from './overlay/Toolbox';
 import Setting from './overlay/Setting';
+import ShowExportDialog from './dialog/ShowExportDialog';
 import ImageSelectDialog from './dialog/ImageSelectDialog';
 import { TextEditController, hideTextEditor, showBoundedTextEditor, showFreeTextEditor } from './text-editor/TextEditor';
-import InitItemVisitor from './visitor/init-item-visitor';
-import ShowExportDialog from './dialog/ShowExportDialog';
-import ExportVisitor from './visitor/export-visitor';
+import Obstacle from './item/obstacle';
 
 interface AppState {
   isLoading: boolean;
@@ -76,10 +77,8 @@ class App extends Component<any, AppState> {
     }
     this._itemPool = new ItemPool(this.state.ctx.display, this.state.ctx.canvasSize);
     this._currentTool = new SelectionTool(this._itemPool);
-    this._itemPool.addItem(new Description({ id: '1', text: 'box1\ncsacsacas\naaaaaaa', pos: { x: 400, y: 300 }, rotate: 0 }));
-    this._itemPool.addItem(new Box({ id: '2', name: 'box2', pos: { x: 500, y: 300 }, size: { w: 200, h: 100 }, rotate: 45 }));
-    this._itemPool.addItem(new Photo({ id: '3', url: `${process.env.PUBLIC_URL}/logo512.png`, size: { w: 128, h: 128 }, pos: { x: 600, y: 500 }, rotate: 0 }));
-    this._itemPool.addItem(new Obstacle({ id: '4', pos: { x: 400, y: 500 }, size: { w: 100, h: 100 }, rotate: 0 }));
+    this._itemPool.addItem(new RemoteComposite({ id: '1', url: `${process.env.PUBLIC_URL}/composite.json` }));
+    this._itemPool.addItem(new Description({ id: '2', text: 'Use tool at left side to draw and\ndouble click to enable text editing', pos: { x: 850, y: 206 }, rotate: 0 }))
   }
 
   async componentDidMount(): Promise<void> {
@@ -87,6 +86,7 @@ class App extends Component<any, AppState> {
     this._itemPool.visit(visitor);
     await visitor.waitComplete();
     this._imageData = visitor.getImageDataResult();
+    this._itemPool.rebuildQuadtree();
     this.setState({ isLoading: false });
     setTimeout(() => this._updateCanvas(), 100);
     window.addEventListener('keydown', this._onKeyboardDown);
@@ -242,7 +242,6 @@ class App extends Component<any, AppState> {
   private _onDoubleClick = (windowPos: Point, canvasPos: Point): void => {
     if (this._itemPool.selected !== undefined) {
       const interactType = this._itemPool.selected.checkInteract(canvasPos, true);
-      console.log(interactType);
       if (interactType === InteractingType.Text) {
         const [type, pos, size, rotate, style, text] = this._itemPool.selected.onTextEditStart();
         this._textBuffer = text;

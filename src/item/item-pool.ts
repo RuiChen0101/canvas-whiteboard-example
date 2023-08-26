@@ -6,9 +6,9 @@ import ItemFactory from './item-factory';
 import { DisplayFlag } from '../AppContext';
 import ItemPoolMemento from './item-pool-memento';
 import Item, { Collidable, ItemEvent } from './item';
+import SnapshotVisitor from '../visitor/snapshot-visitor';
 import { ItemInteractor } from '../interactor/item-interactor';
 import MultiItemInteractor from '../interactor/multi-item-interactor';
-import MementoCaptureVisitor from '../visitor/memento-capture-visitor';
 import SingleItemInteractor from '../interactor/single-item-interactor';
 import BuildSelectQuadtreeVisitor from '../visitor/build-select-quadtree-visitor';
 import BuildCollideQuadtreeVisitor from '../visitor/build-collide-quadtree-visitor';
@@ -102,6 +102,17 @@ class ItemPool {
         return items;
     }
 
+    rebuildQuadtree(): void {
+        this._selectQuadtree.clear();
+        this._collideQuadtree.clear();
+        const selectVisitor = new BuildSelectQuadtreeVisitor(this._display, this._selectQuadtree);
+        const collideVisitor = new BuildCollideQuadtreeVisitor(this._collideQuadtree);
+        this.visit(selectVisitor);
+        this.visit(collideVisitor);
+        this._selectQuadtree = selectVisitor.getResult();
+        this._collideQuadtree = collideVisitor.getResult();
+    }
+
     isCollide(pos: Point, size: Size, rotate: number, excludeId?: string): boolean {
         const objs = this._collideQuadtree.detectCollision(pos, size, rotate);
         return objs.filter((o, _) => o.id !== excludeId ?? '').length !== 0;
@@ -123,7 +134,7 @@ class ItemPool {
     }
 
     save(): ItemPoolMemento {
-        const visitor = new MementoCaptureVisitor();
+        const visitor = new SnapshotVisitor();
         this.visit(visitor);
         return new ItemPoolMemento(visitor.getResult());
     }
